@@ -1,0 +1,13 @@
+{
+    "server": {
+      "port": 9090,
+      "host": "localhost"
+    },
+    "database": {
+      "url": "mongodb://127.0.0.1:27017/EcoSphereEspritDb"
+    },
+    "security": {
+        "PasswordHashSalt" : "QrZB2E6Np9FV7wXd"
+    }
+  }
+  
