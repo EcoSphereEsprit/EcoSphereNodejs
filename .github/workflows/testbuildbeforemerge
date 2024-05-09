@@ -1,0 +1,44 @@
+name: Node.js Build
+
+on:
+  pull_request:
+    types: [opened]
+    branches:
+      - main  # Adjust this to match your main branch name
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install Node.js and npm
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build  # Adjust this command based on your build script
+
+      - name: Check if build successful
+        run: |
+          if [ -d "dist" ]; then
+            echo "Build successful"
+            exit 0
+          else
+            echo "Build failed"
+            exit 1
+          fi
+
+  merge-blocking:
+    needs: build
+    if: ${{ failure() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Block PR merge
+        run: exit 1
