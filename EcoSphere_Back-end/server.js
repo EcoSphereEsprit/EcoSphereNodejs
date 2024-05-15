@@ -4,6 +4,9 @@ import cors from 'cors'
 import {InitDbSetup} from './config/DataBaseSetUp.js'
 import userRoutes from './routes/user.route.js'
 import imgRoutes from './routes/img.route.js'
+import commandeRoutes from './routes/commande.route.js';
+import detailsCommandeRoutes from './routes/detailsCommande.route.js';
+import couponModel from './models/coupon.model.js';
 import { notFoundError, errorHandler } from './middlewares/errorhandler.js'
 import * as fs from 'fs';
 
@@ -18,7 +21,11 @@ app.use(cors())
 app.use(express.json())
 //Only use in dev envirement
 app.use(morgan('dev'))
+app.use('/commandes', commandeRoutes); 
+app.use('/detailscommande', detailsCommandeRoutes);
+
 app.use('/user', userRoutes)
+
 app.use('/img', imgRoutes)
 app.use(notFoundError)
 app.use(errorHandler)

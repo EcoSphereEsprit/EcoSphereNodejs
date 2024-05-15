@@ -5,7 +5,7 @@ const { Schema, model } = mongoose;
 const detailsCommandeSchema = new Schema({
     commande: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Commande',
+        ref: 'Commandes',
         required: true
     },
     produit: {
@@ -19,6 +19,10 @@ const detailsCommandeSchema = new Schema({
     },
     prixUnitaire: {
         type: Number,
+        required: true
+    },
+    nomProduit: {
+        type: String,
         required: true
     }
 });

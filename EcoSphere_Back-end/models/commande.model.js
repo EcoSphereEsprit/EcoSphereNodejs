@@ -8,6 +8,11 @@ const commandeSchema = new Schema({
         required: true,
         unique: true 
     },
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
     produits: [{
         idProduit: {
             type: mongoose.Schema.Types.ObjectId,
@@ -57,6 +62,16 @@ const commandeSchema = new Schema({
         enum: ['en_attente', 'confirmée', 'expédiée', 'livrée'],
         default: 'en_attente'
     },
+    statutPaiement: {
+        type: String,
+        enum: ['en_attente', 'payée', 'remboursée'],
+        default: 'en_attente'
+    },
+    statutLivraison: {
+        type: String,
+        enum: ['en_attente', 'expédiée', 'livrée'],
+        default: 'en_attente'
+    },
     prixTotal: {
         type: Number,
         required: true
@@ -76,7 +91,7 @@ const commandeSchema = new Schema({
         min: 0,
         max: 100 
     },
-    creeLe: {
+    dateCommande: {
         type: Date,
         default: Date.now
     }
