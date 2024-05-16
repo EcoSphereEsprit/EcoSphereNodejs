@@ -3,6 +3,7 @@ import { validationResult } from 'express-validator'
 
 
 
+
 export function addone(req,res){
     if(!validationResult(req).isEmpty()){
         res.status(400).json({errors : validationResult(req).array()})

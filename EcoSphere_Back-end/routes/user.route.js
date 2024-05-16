@@ -1,7 +1,7 @@
 import express from 'express';
 import { body } from 'express-validator';
 import { addone, findAll, getOneByUserName} from '../controllers/user.controller.js';
-import multer from '../middlewares/multer-config.js';
+import multer from 'multer';
 const router = express.Router();
 
 router
