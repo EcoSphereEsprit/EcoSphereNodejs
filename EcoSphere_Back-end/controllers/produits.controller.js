@@ -1,11 +1,14 @@
 import Produit from '../models/produits.model.js'
+
 import { validationResult } from 'express-validator'
 
-export function addOneProduct(req, res) {
+export function addProduit(req, res) {
     if (!validationResult(req).isEmpty()) {
+        console.log('xxxxxxxxxxxxx')
         res.status(400).json({ errors: validationResult(req).array() });
     } else {
-        const { name, description, prix, quantite_stock, categorie, userId } = req.body;
+        console.log('hhhhhhhh')
+        const { name, description, prix, quantite_stock, categorie, brand, couleur, available } = req.body;
         
         const produitData = {
             name: name,
@@ -13,8 +16,10 @@ export function addOneProduct(req, res) {
             prix: prix,
             quantite_stock: quantite_stock,
             categorie: categorie,
-            //update all attributes
-            image: `${req.protocol}://${req.get('host')}/img/${req.file.filename}`
+            brand: brand,
+            couleur: couleur,
+            available: available,
+            // image: `${req.protocol}://${req.get('host')}/img/${req.file.filename}`
         };
 
         Produit.create(produitData)
@@ -24,5 +29,9 @@ export function addOneProduct(req, res) {
             .catch(err => {
                 res.status(500).json(err);
             });
+
+
+         
+    
     }
 }

@@ -19,10 +19,10 @@ const produitSchema = new Schema({
         type: Number,
         required: true
     },
-    image : {
-        type: String,
-        required : true
-    },
+    // image : {
+    //     type: String,
+    //     required : true
+    // },
     categorie: {
         type: Schema.Types.ObjectId,
         ref: 'Categories', // Adjusted to match the actual model name

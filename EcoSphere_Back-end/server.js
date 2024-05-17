@@ -6,6 +6,8 @@ import userRoutes from './routes/user.route.js'
 import imgRoutes from './routes/img.route.js'
 import { notFoundError, errorHandler } from './middlewares/errorhandler.js'
 import * as fs from 'fs';
+// produit
+import productRouter from './routes/produits.route.js'
 
 
 
@@ -18,11 +20,15 @@ app.use(cors())
 app.use(express.json())
 //Only use in dev envirement
 app.use(morgan('dev'))
+//produit routes
+app.use('/produit', productRouter);
 app.use('/user', userRoutes)
 app.use('/img', imgRoutes)
 app.use(notFoundError)
 app.use(errorHandler)
 app.use('/img', express.static('.\public\images'));
+
+
 
 //db conig call
 InitDbSetup(configObject.database.url);
