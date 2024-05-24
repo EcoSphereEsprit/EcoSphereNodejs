@@ -33,4 +33,28 @@ export const getAllCategories = async (req, res) => {
     }
 };
 
+export const deleteCategorie = async (req, res) => {
+    try {
+        const categorie = await Categorie.findByIdAndDelete(req.params.id);
+        if (!categorie) {
+            return res.status(404).json({ message: 'Catégorie non trouvée' });
+        }
+        res.json({ message: 'Catégorie supprimée avec succès' });
+    } catch (error) {
+        res.status(500).json({ message: 'Erreur lors de la suppression de la catégorie', erreur: error.message });
+    }
+};
+
+export const updateCategorie = async (req, res) => {
+    try {
+        const categorie = await Categorie.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (!categorie) {
+            return res.status(404).json({ message: 'Catégorie non trouvée' });
+        }
+        res.json({ message: 'Catégorie mise à jour avec succès', categorie });
+    } catch (error) {
+        res.status(500).json({ message: 'Erreur lors de la mise à jour de la catégorie', erreur: error.message });
+    }
+};
+
 

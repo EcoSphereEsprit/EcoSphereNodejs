@@ -26,7 +26,7 @@ app.use(morgan('dev'))
 
 //produit routes
 app.use('/produit', productRouter);
-app.use('/Getproduits', productRouter);
+//app.use('/Getproduits', productRouter);
 //categories routes
 app.use('/categories', categorieRouter);
 
