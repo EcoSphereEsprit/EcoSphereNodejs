@@ -19,22 +19,22 @@ const produitSchema = new Schema({
         type: Number,
         required: true
     },
-    // image : {
-    //     type: String,
-    //     required : true
-    // },
     categorie: {
         type: Schema.Types.ObjectId,
-        ref: 'Categories', // Adjusted to match the actual model name
+        ref: 'Categories', 
         required: true
     },
-    brand : {
+    image: {
         type: String,
-        required : false
+        required: false
     },
-    couleur : {
+    brand: {
         type: String,
-        required : false
+        required: false
+    },
+    couleur: {
+        type: String,
+        required: false
     },
     createdAt: {
         type: Date,
@@ -50,4 +50,4 @@ const produitSchema = new Schema({
     }
 });
 
-export default model('Produits', produitSchema); // Ensure 'Produits' is the intended model name
+export default model('Produits', produitSchema);

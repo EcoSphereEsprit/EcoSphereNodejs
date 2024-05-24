@@ -6,12 +6,12 @@ const categorieSchema = new Schema({
     name: {
         type: String,
         required: true,
-        unique: true // Ensure category names are unique
+        unique: true
     },
-    description: {
-        type: String,
+    Nbr_produits: {
+        type: Number,
         required: true
     }
 });
 
-export default model('Categories', categorieSchema);
+export default model('Categorie', categorieSchema); 
