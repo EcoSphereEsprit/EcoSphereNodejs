@@ -1,4 +1,5 @@
 import Produits from '../models/produits.model.js'
+import upload from '../middlewares/multer-config.js';
 
 import { validationResult } from 'express-validator'
 
@@ -42,7 +43,7 @@ import { validationResult } from 'express-validator'
 }*/
 
 export function addProduit(req, res) {
-    const { name, description, prix, quantite_stock, categorie, image, brand, couleur, available } = req.body;
+    const { name, description, prix, quantite_stock, categorie, brand, couleur, available } = req.body;
 
     const produitData = {
         name: name,
@@ -50,14 +51,15 @@ export function addProduit(req, res) {
         prix: prix,
         quantite_stock: quantite_stock,
         categorie: categorie,
+        // image : `${req.protocol}://${req.get('host')}/img/${req.file.filename}`,
         brand: brand,
         couleur: couleur,
         available: available,
     };
 
-    // Only include image field if it's provided in the request body :okayy thank <3
-    if (image) {
-        produitData.image = image;
+    // If an image file is uploaded, add the image URL to produitData
+    if (req.file) {
+        produitData.image = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
     }
 
     Produits.create(produitData)
@@ -113,11 +115,46 @@ export const updateProduit = async (req, res) => {
         produit.couleur = req.body.couleur || produit.couleur;
         produit.available = req.body.available || produit.available;
 
+
+        if (req.file) {
+            produit.image = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
+        }
+
         await produit.save();
 
         res.json({ message: 'Produit mis à jour avec succès', produit });
     } catch (error) {
         res.status(500).json({ message: 'Erreur lors de la mise à jour du produit', erreur: error.message });
+    }
+};
+
+export const getProduitById = async (req, res) => {
+    try {
+        const produit = await Produits.findById(req.params.id);
+        if (!produit) {
+            return res.status(404).json({ message: 'Produit non trouvé' });
+        }
+        res.json(produit);
+    } catch (error) {
+        res.status(500).json({ message: 'Erreur lors de la récupération du produit', erreur: error.message });
+    }
+};
+
+export const getProduitByName = async (req, res) => {
+    try {
+        const nameQuery = req.query.name;
+        if (!nameQuery) {
+            return res.status(400).json({ message: 'Le paramètre "name" est requis' });
+        }
+
+        const produits = await Produits.find({ name: new RegExp(nameQuery, 'i') });
+        if (produits.length === 0) {
+            return res.status(404).json({ message: 'Aucun produit trouvé' });
+        }
+
+        res.json(produits);
+    } catch (error) {
+        res.status(500).json({ message: 'Erreur lors de la récupération des produits', erreur: error.message });
     }
 };
 
