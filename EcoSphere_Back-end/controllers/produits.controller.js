@@ -57,7 +57,6 @@ export function addProduit(req, res) {
         available: available,
     };
 
-    // If an image file is uploaded, add the image URL to produitData
     if (req.file) {
         produitData.image = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
     }
