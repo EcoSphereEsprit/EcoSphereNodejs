@@ -29,6 +29,7 @@ const produitSchema = new Schema({
         required: true
     },
     brand: {
+        
         type: String,
         required: false
     },

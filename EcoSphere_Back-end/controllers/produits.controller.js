@@ -1,46 +1,9 @@
-import Produits from '../models/produits.model.js'
+import Produits from '../models/produits.model.js';
+import Categorie from '../models/categories.model.js'; 
 import upload from '../middlewares/multer-config.js';
-
 import { validationResult } from 'express-validator'
 
-/*export function addProduit(req, res) {
-    if (!validationResult(req).isEmpty()) {
-       
-         res.status(400).json({ errors: validationResult(req).array() });
-     } else {
-       
-        const { name, description, prix, quantite_stock, categorie, image, brand, couleur, available } = req.body;
-        console.log(`this is the data of the product`, produitData);
-        const produitData = {
-            name: name,
-            description: description,
-            prix: prix,
-            quantite_stock: quantite_stock,
-            categorie: categorie,
-            brand: brand,
-            couleur: couleur,
-            available: available,
-            image: image
-            // image: `${req.protocol}://${req.get('host')}/img/${req.file.filename}`
-            
-        };
 
-        Produits.create(produitData)
-            .then(newProduit => {
-                res.status(201).json(newProduit);
-                console.log(`xxxxxxxx`, newProduit);
-            })
-            .catch(err => {
-                console.log(`produittttt`, err);
-                res.status(500).json(err);
-            });
-
-
-         
-    
-     }
-
-}*/
 
 export function addProduit(req, res) {
     const { name, description, prix, quantite_stock, categorie, brand, couleur, available } = req.body;
@@ -62,7 +25,9 @@ export function addProduit(req, res) {
     }
 
     Produits.create(produitData)
-        .then(newProduit => {
+        .then(async newProduit => {
+            // Incrémenter le nombre de produits dans la catégorie associée
+            await Categorie.findByIdAndUpdate(categorie, { $inc: { Nbr_produits: 1 } });
             res.status(201).json(newProduit);
             console.log(`New Product Created:`, newProduit);
         })
@@ -70,6 +35,7 @@ export function addProduit(req, res) {
             console.error(`Error Creating Product:`, err);
             res.status(500).json(err);
         });
+        
 }
 
 export function getProduits(req, res) {
@@ -90,6 +56,9 @@ export const deleteProduit = async (req, res) => {
         if (!produit) {
             return res.status(404).json({ message: 'Produit non trouvé' });
         }
+        // Décrémenter le nombre de produits dans la catégorie associée
+        await Categorie.findByIdAndUpdate(produit.categorie, { $inc: { Nbr_produits: -1 } });
+
         res.json({ message: 'Produit supprimé avec succès' });
     } catch (erreur) {
         res.status(500).json({ message: 'Erreur lors de la suppression du produit', erreur });
@@ -103,7 +72,8 @@ export const updateProduit = async (req, res) => {
             return res.status(404).json({ message: 'Produit non trouvé' });
         }
 
-        
+        const { categorie: newCategorie } = req.body;
+        const oldCategorie = produit.categorie;
         produit.name = req.body.name || produit.name;
         produit.description = req.body.description || produit.description;
         produit.prix = req.body.prix || produit.prix;
@@ -119,7 +89,17 @@ export const updateProduit = async (req, res) => {
             produit.image = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
         }
 
+        
         await produit.save();
+
+
+        // Vérifier si la catégorie a été modifiée
+        if (newCategorie !== oldCategorie) {
+            
+            await Categorie.findByIdAndUpdate(oldCategorie, { $inc: { Nbr_produits: -1 } });
+            
+            await Categorie.findByIdAndUpdate(newCategorie, { $inc: { Nbr_produits: 1 } });
+        }
 
         res.json({ message: 'Produit mis à jour avec succès', produit });
     } catch (error) {
@@ -154,6 +134,89 @@ export const getProduitByName = async (req, res) => {
         res.json(produits);
     } catch (error) {
         res.status(500).json({ message: 'Erreur lors de la récupération des produits', erreur: error.message });
+    }
+};
+
+export const getProduitsByCategorieName = async (req, res) => {
+    try {
+        const { categorieName } = req.params;
+        console.log(`Recherche de la catégorie par nom: ${categorieName}`);
+
+        const categorie = await Categorie.findOne({ name: categorieName });
+        if (!categorie) {
+            console.log('Catégorie non trouvée');
+            return res.status(404).json({ message: 'Catégorie non trouvée' });
+        }
+
+        console.log(`Catégorie trouvée: ${categorie._id}`);
+        const produits = await Produits.find({ categorie: categorie._id });
+        res.json(produits);
+    } catch (error) {
+        console.error('Erreur lors de la récupération des produits:', error.message);
+        res.status(500).json({ message: 'Erreur lors de la récupération des produits', erreur: error.message });
+    }
+};
+
+export const getProduitsByPriceRange = async (req, res) => {
+    try {
+        const { min, max } = req.query;
+
+        if (!min || !max) {
+            return res.status(400).json({ message: 'Veuillez fournir les paramètres de prix min et max.' });
+        }
+
+        const produits = await Produits.find({
+            prix: {
+                $gte: Number(min),
+                $lte: Number(max)
+            }
+        });
+
+        res.json(produits);
+    } catch (error) {
+        console.error('Erreur lors de la récupération des produits:', error.message);
+        res.status(500).json({ message: 'Erreur lors de la récupération des produits', erreur: error.message });
+    }
+};
+
+export const getProduitsSortedByDate = async (req, res) => {
+    try {
+        const { order } = req.query;
+        let sortOrder = 1; // tri asce
+
+        
+        if (order && order.toLowerCase() === 'desc') {
+            sortOrder = -1; // Tri descendant
+        }
+
+        
+        const produits = await Produits.find().sort({ createdAt: sortOrder });
+
+        res.json(produits);
+    } catch (error) {
+        console.error('Erreur lors de la récupération des produits:', error.message);
+        res.status(500).json({ message: 'Erreur lors de la récupération des produits', erreur: error.message });
+    }
+};
+
+export const checkStockAvailability = async (req, res) => {
+    try {
+        const { productId } = req.params;
+
+       
+        const produit = await Produits.findById(productId);
+
+        if (!produit) {
+            return res.status(404).json({ message: 'Produit non trouvé' });
+        }
+
+        
+        const isAvailable = produit.quantite_stock > 0;
+
+        res.json({ isAvailable });
+    } catch (error) {
+        console.error('Erreur lors de la vérification de la disponibilité du stock:', error.message);
+        res.status(500).json({ message: 'Erreur lors de la vérification de la disponibilité du stock', erreur: error.message });
     }
 };
 
