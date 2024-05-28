@@ -56,7 +56,7 @@ export const deleteProduit = async (req, res) => {
         if (!produit) {
             return res.status(404).json({ message: 'Produit non trouvé' });
         }
-        // Décrémenter le nombre de produits dans la catégorie associée
+        
         await Categorie.findByIdAndUpdate(produit.categorie, { $inc: { Nbr_produits: -1 } });
 
         res.json({ message: 'Produit supprimé avec succès' });
@@ -93,7 +93,7 @@ export const updateProduit = async (req, res) => {
         await produit.save();
 
 
-        // Vérifier si la catégorie a été modifiée
+        // Vérifier si la catégorie updated
         if (newCategorie !== oldCategorie) {
             
             await Categorie.findByIdAndUpdate(oldCategorie, { $inc: { Nbr_produits: -1 } });
@@ -186,7 +186,7 @@ export const getProduitsSortedByDate = async (req, res) => {
 
         
         if (order && order.toLowerCase() === 'desc') {
-            sortOrder = -1; // Tri descendant
+            sortOrder = -1; // Tri desc
         }
 
         
