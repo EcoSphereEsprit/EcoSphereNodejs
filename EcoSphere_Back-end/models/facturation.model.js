@@ -5,7 +5,7 @@ const { Schema, model } = mongoose;
 const facturationSchema = new Schema({
     commandeId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Commandes',
+        ref: 'Commande', 
         required: true
     },
     montantTotal: {
