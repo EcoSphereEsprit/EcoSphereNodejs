@@ -6,7 +6,7 @@ const commandeSchema = new Schema({
     numCommande: {
         type: String,
         required: true,
-        unique: true 
+        unique: true
     },
     userId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -25,7 +25,7 @@ const commandeSchema = new Schema({
         prixUnitaire: {
             type: Number, 
             required: true
-        }
+        },
     }],
     infosLivraison: {
         nom: {
@@ -78,7 +78,7 @@ const commandeSchema = new Schema({
     },
     modePaiement: {
         type: String,
-        enum: ['carte_de_crédit', 'paypal', 'livraison_direct'],
+        enum: ['carte_de_crédit', 'livraison_direct'],
         required: true
     },
     coupon: {
