@@ -1,0 +1,11 @@
+{
+  "name": "ecospherenodejs",
+  "version": "1.0.0",
+  "description": "this is EcoSphere  back end using Node.js and Express\r running on node v20.11.0\r please npm i then npm run dev to run as dev.\r dbconenction string should be good for every one if you get any issue please update it in app.config.json.\r best of luck",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

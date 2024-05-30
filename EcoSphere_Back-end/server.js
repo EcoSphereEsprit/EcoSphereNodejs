@@ -6,6 +6,10 @@ import userRoutes from './routes/user.route.js'
 import imgRoutes from './routes/img.route.js'
 import { notFoundError, errorHandler } from './middlewares/errorhandler.js'
 import * as fs from 'fs';
+// produit
+import productRouter from './routes/produits.route.js'
+import categorieRouter from './routes/categories.route.js'
+
 import commandeRoutes from './routes/commande.route.js';
 import facturationRoutes from './routes/facturation.route.js';
 import paiementRoutes from './routes/paiement.route.js';
@@ -23,8 +27,18 @@ app.use(cors())
 app.use(express.json())
 //Only use in dev envirement
 app.use(morgan('dev'))
-app.use('/user', userRoutes)
+
+//merge
+//produit routes
+app.use('/produit', productRouter);
+//app.use('/Getproduits', productRouter);
+//categories routes
+app.use('/categories', categorieRouter);
+
+
+
 app.use('/img', imgRoutes)
+app.use('/user', userRoutes)
 app.use(notFoundError)
 app.use(errorHandler)
 app.use('/img', express.static('.\public\images'));
@@ -33,6 +47,8 @@ app.use('/facturation', facturationRoutes);
 app.use('/paiement', paiementRoutes);
 app.use('/user', userRoutes);
 app.use('/img', imgRoutes);
+
+
 
 //db conig call
 InitDbSetup(configObject.database.url);

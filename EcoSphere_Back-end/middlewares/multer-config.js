@@ -30,3 +30,5 @@ limits: 10 * 1024 * 1024,
 }).single("image"); // Le fichier est envoyé dans le body avec nom/clé 'image'
 
 //.array("images", 5); for more than one 
+
+
