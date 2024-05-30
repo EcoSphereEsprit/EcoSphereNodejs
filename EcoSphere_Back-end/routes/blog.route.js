@@ -1,33 +1,32 @@
 import express from 'express';
 import multer from 'multer';
-import { createBlog, getAllBlogs, getBlogById, updateBlog, deleteBlog } from '../controllers/blog.controller.js';
- 
+import {
+    createBlog,
+    getAllBlogs,
+    getBlogById,
+    updateBlog,
+    deleteBlog
+} from '../controllers/blog.controller.js';
 
+const router = express.Router();
+
+// Configuration de Multer pour le stockage des images
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
+    destination: (req, file, cb) => {
         cb(null, 'images/');
     },
-    filename: function (req, file, cb) {
+    filename: (req, file, cb) => {
         cb(null, Date.now() + '-' + file.originalname);
     }
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ storage });
 
-const router = express.Router();
-
-
-// Créer un nouveau blog
-router.post('/', createBlog);
-
-// Afficher la liste  de blogs
+// Routes pour les blogs
+router.post('/', upload.single('image'), createBlog);
 router.get('/', getAllBlogs);
-
-// affiche chaque  blog par son id
 router.get('/:id', getBlogById);
-
-// Route pour mettre à jour un blog
-router.put('/:id', upload.single('image'), updateBlog);
-// supprimer un blog
+router.patch('/:id', upload.single('image'), updateBlog);
 router.delete('/:id', deleteBlog);
+
 export default router;

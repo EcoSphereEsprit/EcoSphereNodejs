@@ -1,110 +1,78 @@
+import express from 'express';
 import Blog from '../models/blog.model.js';
 import multer from 'multer';
-import mongoose from 'mongoose';
 
-// Configuration de multer pour le stockage d'images
+
+// Configuration de Multer pour le stockage des images
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'images/'); // Le dossier où les images seront stockées
+    destination: (req, file, cb) => {
+        cb(null, 'images/');
     },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + '-' + file.originalname); // Nom du fichier
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + '-' + file.originalname);
     }
 });
 
-const upload = multer({ storage: storage }).single('image');
+const upload = multer({ storage });
 
-// Créer un nouveau blog avec image et date fournie
+// Create a new blog with image upload
 export const createBlog = async (req, res) => {
-    upload(req, res, async function (err) {
-        if (err instanceof multer.MulterError) {
-            // Une erreur multer s'est produite
-            return res.status(500).json({ message: err.message });
-        } else if (err) {
-            // Une autre erreur s'est produite
-            return res.status(500).json({ message: err.message });
-        }
-
-        // Tout s'est bien passé, le fichier a été téléchargé avec succès
-        try {
-            const { idAuthor, title, content, date, eventId } = req.body;
-
-            let event = null;
-            if (eventId) {
-                if (!mongoose.Types.ObjectId.isValid(eventId)) {
-                    return res.status(400).json({ message: 'Invalid event ID' });
-                }
-
-                event = await Event.findById(eventId);
-                if (!event) {
-                    return res.status(404).json({ message: 'Event not found' });
-                }
-            }
-
-            const imagePath = req.file ? req.file.path : ''; // Chemin de l'image
-
-            const newBlogData = {
-                idAuthor,
-                title,
-                content,
-                date,
-                image: imagePath
-            };
-
-            if (event) {
-                newBlogData.event = eventId;
-            }
-
-            const newBlog = await Blog.create(newBlogData);
-
-            res.status(201).json(newBlog);
-        } catch (error) {
-            res.status(400).json({ message: error.message });
-        }
-    });
+    try {
+        const blogData = {
+            title: req.body.title,
+            description: req.body.description,
+            date: req.body.date,
+            image: req.file ? req.file.path : null,
+        };
+        const blog = new Blog(blogData);
+        await blog.save();
+        res.status(201).send(blog);
+    } catch (error) {
+        res.status(400).send(error);
+    }
 };
 
-
-// Liste des blogs
+// Obtenir tous les blogs
 export const getAllBlogs = async (req, res) => {
     try {
-        const blogs = await Blog.find();
-        res.status(200).json(blogs);
+        const blogs = await Blog.find().populate('comments');
+        res.send(blogs);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).send(error);
     }
 };
 
-//  Blog by id
+// Obtenir un blog par ID
 export const getBlogById = async (req, res) => {
-    const { id } = req.params;
     try {
-        const blog = await Blog.findById(id);
+        const blog = await Blog.findById(req.params.id).populate('comments');
         if (!blog) {
-            return res.status(404).json({ message: 'Blog not found' });
+            return res.status(404).send();
         }
-        res.status(200).json(blog);
+        res.send(blog);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).send(error);
     }
 };
 
-// Mettre à jour un blog
+// Mettre à jour un blog par ID
 export const updateBlog = async (req, res) => {
-    const { id } = req.params;
+    const updates = Object.keys(req.body);
+    const allowedUpdates = ['title', 'description', 'date', 'comments'];
+    const isValidOperation = updates.every(update => allowedUpdates.includes(update));
 
-    // Vérifiez si l'ID est un ObjectId valide
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ message: 'Invalid blog ID' });
+    if (!isValidOperation) {
+        return res.status(400).send({ error: 'Invalid updates!' });
     }
-
+    //Ajouter 28/05
     console.log(`Updating blog with ID: ${id}`);
     console.log('Request body:', req.body);
-
+    //fin ajout
     const updateData = req.body;
-
     try {
+        const blog = await Blog.findByIdAndUpdate(req.params.id);
         // Si la date est fournie, mettez à jour la date du blog
+        //Ajout 28/05
         if (updateData.date) {
             updateData.date = new Date(updateData.date); // Convertir la date en objet Date
         }
@@ -113,32 +81,36 @@ export const updateBlog = async (req, res) => {
         if (req.file) {
             updateData.image = req.file.path;
         }
-
-        const updatedBlog = await Blog.findByIdAndUpdate(id, updateData, { new: true });
-
-        if (!updatedBlog) {
+        //fin ajout
+        if (!blog) {
             console.log('Blog not found');
             return res.status(404).json({ message: 'Blog not found' });
         }
-
-        console.log('Blog updated successfully:', updatedBlog);
-        res.status(200).json(updatedBlog);
+        console.log('Blog updated successfully:', blog);
+        res.status(200).json(blog);
+        updates.forEach(update => blog[update] = req.body[update]);
+        if (req.file) {
+            blog.image = req.file.path;
+        }
+        await blog.save();
+        res.send(blog);
     } catch (error) {
         console.error('Error updating blog:', error);
         res.status(500).json({ message: error.message });
     }
 };
 
+// Supprimer un blog par ID
 export const deleteBlog = async (req, res) => {
-    const { id } = req.params;
     try {
-        const deletedBlog = await Blog.findByIdAndDelete(id);
-        if (!deletedBlog) {
+        const blog = await Blog.findByIdAndDelete(req.params.id);
+
+        if (!blog) {
             return res.status(404).json({ message: 'Blog not found' });
         }
         res.status(200).json({ message: 'Blog deleted successfully' });
+        res.send(blog);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).send(error);
     }
 };
-

@@ -3,7 +3,7 @@ import morgan from 'morgan'
 import cors from 'cors'
 import {InitDbSetup} from './config/DataBaseSetUp.js'
 import userRoutes from './routes/user.route.js'
-import eventRoutes from './routes/event.route.js'
+import commentRoutes from './routes/comment.route.js'
 import blogRoutes from './routes/blog.route.js'
 import imgRoutes from './routes/img.route.js'
 import { notFoundError, errorHandler } from './middlewares/errorhandler.js'
@@ -23,7 +23,7 @@ app.use(morgan('dev'))
 app.use('/user', userRoutes)
 app.use('/img', imgRoutes)
 app.use('/blogs', blogRoutes)
-app.use('/events', eventRoutes)
+app.use('/comments', commentRoutes)
 app.use(notFoundError)
 app.use(errorHandler)
 app.use('/img', express.static('.\public\images'));
