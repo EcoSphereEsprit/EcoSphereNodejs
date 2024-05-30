@@ -23,7 +23,7 @@ app.use(express.json())
 //Only use in dev envirement
 app.use(morgan('dev'))
 
-
+//merge
 //produit routes
 app.use('/produit', productRouter);
 //app.use('/Getproduits', productRouter);
