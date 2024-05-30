@@ -6,6 +6,7 @@ import userRoutes from './routes/user.route.js'
 import imgRoutes from './routes/img.route.js'
 import { notFoundError, errorHandler, authenticateToken } from './middlewares/errorhandler.js'
 import * as fs from 'fs';
+import couponRoutes from './routes/coupon.route.js'
 // produit
 import productRouter from './routes/produits.route.js'
 import categorieRouter from './routes/categories.route.js'
@@ -40,6 +41,7 @@ app.use('/categories', categorieRouter);
 
 
 app.use('/img', imgRoutes)
+app.use('/coupon', couponRoutes)
 app.use('/user', userRoutes)
 app.use(notFoundError)
 app.use(errorHandler)
@@ -57,19 +59,6 @@ app.use('/img', imgRoutes);
 InitDbSetup(configObject.database.url);
 
 
-app.listen(configObject.server.port, ()=> {
+app.listen(configObject.server.port, () => {
   console.info("server listning on " + configObject.server.port)
 })
-
-
-
-
-
-
-
-
-
-
-
-
-
