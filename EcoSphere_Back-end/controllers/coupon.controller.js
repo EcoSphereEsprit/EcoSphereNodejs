@@ -12,15 +12,11 @@ export function addone(req, res) {
             code: req.body.code,
             reduction: req.body.reduction,
             dateExpiration: req.body.dateExpiration,
-        }
-
-        )
-            .then(newCoupon => {
-                res.status(201).json(newCoupon)
-            })
-            .catch(err => {
-                res.status(500).json(err)
-            })
+        }).then(newCoupon => {
+            res.status(201).json(newCoupon)
+        }).catch(err => {
+            res.status(500).json(err)
+        })
     }
 }
 
