@@ -4,7 +4,7 @@ import cors from 'cors'
 import { InitDbSetup } from './config/DataBaseSetUp.js'
 import userRoutes from './routes/user.route.js'
 import imgRoutes from './routes/img.route.js'
-import { notFoundError, errorHandler } from './middlewares/errorhandler.js'
+import { notFoundError, errorHandler, authenticateToken } from './middlewares/errorhandler.js'
 import * as fs from 'fs';
 import commandeRoutes from './routes/commande.route.js';
 import facturationRoutes from './routes/facturation.route.js';
@@ -23,10 +23,12 @@ app.use(cors())
 app.use(express.json())
 //Only use in dev envirement
 app.use(morgan('dev'))
+app.use(authenticateToken);
 app.use('/user', userRoutes)
 app.use('/img', imgRoutes)
 app.use(notFoundError)
 app.use(errorHandler)
+
 app.use('/img', express.static('.\public\images'));
 app.use('/commandes', commandeRoutes);
 app.use('/facturation', facturationRoutes);
@@ -37,8 +39,9 @@ app.use('/img', imgRoutes);
 //db conig call
 InitDbSetup(configObject.database.url);
 
-app.listen(configObject.server.port, () => {
-    console.info("server listning on " + configObject.server.port)
+
+app.listen(configObject.server.port, ()=> {
+  console.info("server listning on " + configObject.server.port)
 })
 
 

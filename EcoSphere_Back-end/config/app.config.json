@@ -7,7 +7,7 @@
       "url": "mongodb://127.0.0.1:27017/EcoSphereEspritDb"
     },
     "security": {
-        "PasswordHashSalt" : "QrZB2E6Np9FV7wXd"
+        "JWTsecretKey" : "u5Jf4B8rL$GnKq#S2vH@M5tP!Rw3z*Z"
     }
   }
   

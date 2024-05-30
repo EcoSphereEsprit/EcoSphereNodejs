@@ -1,15 +1,16 @@
 import express from 'express';
 const router = express.Router();
-
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
 router
 .route('/:imageName')
 .get((req, res) => {
     const imageName = req.params.imageName;
 
-    const imagePath = 'C:\\Users\\job_j\\Desktop\\node training\\exam training\\public\\images\\' + imageName;
+    const __dirname = dirname(fileURLToPath(import.meta.url));
+    const imagesFolderPath = join(__dirname, '../public/images'+'\\'+imageName)
 
-
-    res.sendFile(imagePath);
+    res.sendFile(imagesFolderPath);
 
 });
 
