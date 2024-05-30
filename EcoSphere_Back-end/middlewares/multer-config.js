@@ -30,3 +30,5 @@ export default multer({
 }).single("image"); // Le fichier est envoyé dans le body avec nom/clé 'image'
 
 //.array("images", 5); for more than one 
+
+
