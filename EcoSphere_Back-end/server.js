@@ -3,6 +3,8 @@ import morgan from 'morgan'
 import cors from 'cors'
 import { InitDbSetup } from './config/DataBaseSetUp.js'
 import userRoutes from './routes/user.route.js'
+import commentRoutes from './routes/comment.route.js'
+import blogRoutes from './routes/blog.route.js'
 import imgRoutes from './routes/img.route.js'
 import { notFoundError, errorHandler, authenticateToken } from './middlewares/errorhandler.js'
 import * as fs from 'fs';
@@ -41,6 +43,8 @@ app.use('/categories', categorieRouter);
 
 
 app.use('/img', imgRoutes)
+app.use('/blogs', blogRoutes)
+app.use('/comments', commentRoutes)
 app.use('/coupon', couponRoutes)
 app.use('/user', userRoutes)
 app.use(notFoundError)
