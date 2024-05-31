@@ -6,7 +6,8 @@ const stripeAPI = stripe('votre_clé_secrète_stripe');
 // Créer un paiement avec Stripe
 export const createPaiement = async (req, res) => {
     try {
-        const { commandeId, userId, montant, methode, token } = req.body;
+        const { commandeId, montant, methode, token } = req.body;
+        const userId = req.user.Id;  // Extraire le userId du token JWT
 
         // Création du paiement avec Stripe
         const paiementStripe = await stripeAPI.paymentIntents.create({
