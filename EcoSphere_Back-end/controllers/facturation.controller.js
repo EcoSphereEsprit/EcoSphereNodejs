@@ -1,4 +1,3 @@
-// controllers/facturation.controller.js
 import Facturation from '../models/Facturation.model.js';
 import Commande from '../models/commande.model.js';
 import Stripe from 'stripe';
@@ -26,7 +25,7 @@ export const creerFacturation = async (req, res) => {
             confirm: true
         });
 
-        const nouvelleFacturation = new FacturationModel({
+        const nouvelleFacturation = new Facturation({
             commandeId,
             montantTotal,
             reductions,

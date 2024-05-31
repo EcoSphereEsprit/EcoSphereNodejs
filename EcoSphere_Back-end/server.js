@@ -47,8 +47,6 @@ app.use('/blogs', blogRoutes)
 app.use('/comments', commentRoutes)
 app.use('/coupon', couponRoutes)
 app.use('/user', userRoutes)
-app.use(notFoundError)
-app.use(errorHandler)
 
 app.use('/img', express.static('.\public\images'));
 app.use('/commandes', commandeRoutes);
@@ -58,6 +56,8 @@ app.use('/user', userRoutes);
 app.use('/img', imgRoutes);
 
 
+app.use(notFoundError)
+app.use(errorHandler)
 
 //db conig call
 InitDbSetup(configObject.database.url);
