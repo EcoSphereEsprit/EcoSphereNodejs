@@ -11,24 +11,18 @@ const couponSchema = new Schema({
         type: Number,
         required: true,
     },
+    dateCreation: {
+        type: Date,
+        required: true,
+    },
     dateExpiration: {
         type: Date,
         required: true,
+    },
+    status: {
+        type: String,
+        required: true,
     }
-
-
-    //     FlashSale
-    // Attributes:
-    //         FlashSaleID(Primary Key)
-    // Title
-    // Description
-    // StartTime
-    // EndTime
-    // Status(e.g., upcoming, active, expired)
-    // image_id // 
-    // produit_id
-
-
 });
 
 export default model('Coupon', couponSchema);

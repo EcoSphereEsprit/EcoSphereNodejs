@@ -1,18 +1,30 @@
 import express from 'express';
 import { body } from 'express-validator';
-import { addone, findAll, getOneByCode } from '../controllers/coupon.controller.js';
-import multer from '../middlewares/multer-config.js';
+import { postCoupon, findAll, getOneByCode, updateOneByCode, deleteOneByCode } from '../controllers/coupon.controller.js';
 const router = express.Router();
 
-router.route('/').post(multer,
+//* Create a new Coupon
+router.route('/post').post([
     body('code').isLength({ min: 5, max: 50 }),
     body('code').isString,
     body('reduction').isNumeric,
+    body('dateCreation').isDate,
     body('dateExipration').isDate,
-    addone)
+    body('status').isString],
+    postCoupon)
 
-router.route('/').get(findAll);
+//* Read all coupons
+router.route('/findAll').get(findAll);
 
-router.route('/:code').get(getOneByCode);
+//* Retreive one coupon
+router.route('/findOneByCode/:code').get(getOneByCode);
+
+//* Update a coupon
+router.route('/updateOneByCode/:code').put(updateOneByCode);
+
+//* Delete a coupon
+router.route('/deleteByCode/:code').delete(deleteOneByCode);
 
 export default router;
+
+// request.user

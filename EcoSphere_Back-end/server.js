@@ -16,6 +16,7 @@ import categorieRouter from './routes/categories.route.js'
 import commandeRoutes from './routes/commande.route.js';
 import facturationRoutes from './routes/facturation.route.js';
 import paiementRoutes from './routes/paiement.route.js';
+import flashSaleRoutes from './routes/flashSale.route.js';
 import paiementModel from './models/paiement.model.js';
 import FacturationModel from './models/Facturation.model.js';
 import commandeModel from './models/commande.model.js';
@@ -46,6 +47,7 @@ app.use('/img', imgRoutes)
 app.use('/blogs', blogRoutes)
 app.use('/comments', commentRoutes)
 app.use('/coupon', couponRoutes)
+app.use('/flashSale', flashSaleRoutes)
 app.use('/user', userRoutes)
 app.use(notFoundError)
 app.use(errorHandler)
