@@ -68,6 +68,37 @@ export async function SignUp(req, res) {
     }
 }
 
+export async function CreateAdmin(req, res) {
+    if(req.user.role != RoleEnum.ADMIN){
+        return res.status(403).json({message : 'unauthorized for this type of user'});
+    }
+    if (!validationResult(req).isEmpty()) {
+        return res.status(400).json({ errors: validationResult(req).array() });
+    }
+
+    const salt = generateSalt();
+    try {
+        const isUserNameUsed = await User.findOne({ username: req.body.username });
+        if (isUserNameUsed) {
+            return res.status(409).json({ error: 'Username already taken' });
+        }
+
+        const newUser = await User.create({
+            username: req.body.username,
+            email: req.body.email,
+            role: RoleEnum.ADMIN,
+            password: hashPassWordWithSalt(req.body.password, salt),
+            salt: salt,
+            isActivated : true,
+            phoneNumber: req.body.phoneNumber,
+            image: `${req.protocol}://${req.get('host')}/img/${req.file.filename}`
+        });
+        return res.status(201).json(newUser);
+    } catch (err) {
+        return res.status(500).json(err);
+    }
+}
+
 export function findAll(req,res){
    User.find({} ,'_id username phoneNumber isActivated email role')
    .then(result => {
@@ -219,5 +250,19 @@ export const resetPassWord = async (req, res) =>{
     catch(err){
         console.error(err);
         res.status(500).json({message : 'inetrnal server error'})
+    }
+}
+
+export const disactivaetUser = async (req, res) => {
+    try {
+        if(req.user.role != RoleEnum.ADMIN){
+            return res.status(403).json({error : 'Account type not authorized for this action'});
+        }
+        const userId = req.params.id;
+        await User.findByIdAndUpdate(userId, { isActivated : false }, { new: true });
+
+    } catch (err) {
+        return res.status(500).json({message : "something is wrong contact us for more info thank you"});
+
     }
 }
