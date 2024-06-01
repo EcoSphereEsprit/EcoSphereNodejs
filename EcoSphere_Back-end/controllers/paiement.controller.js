@@ -20,7 +20,7 @@ export const creerPaiement = async (req, res) => {
     }
 };
 
-// Mettre à jour le paiement (par exemple, après la livraison)
+// Mettre à jour le paiement ( après la livraison)
 export const mettreAJourPaiement = async (req, res) => {
     try {
         const { id } = req.params;

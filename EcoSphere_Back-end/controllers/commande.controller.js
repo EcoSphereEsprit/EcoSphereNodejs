@@ -57,11 +57,7 @@ export const obtenirCommandesFiltre = async (req, res) => {
 
         if (statut) filtre.statut = statut;
         if (userId) filtre.userId = userId;
-        if (dateDebut || dateFin) {
-            filtre.dateCommande = {};
-            if (dateDebut) filtre.dateCommande.$gte = new Date(dateDebut);
-            if (dateFin) filtre.dateCommande.$lte = new Date(dateFin);
-        }
+       
 
         const commandes = await Commande.find(filtre).populate('userId').populate('produits.idProduit');
         res.status(200).json(commandes);
