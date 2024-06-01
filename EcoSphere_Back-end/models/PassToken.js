@@ -4,6 +4,8 @@ import moment from 'moment-timezone';
 
 const { Schema, model } = mongoose;
 
+const addOneHour = () => moment.tz('Africa/Tunis').add(1, 'hour').add(20, 'minutes').toDate();
+
 const PassToken = new Schema({
     token: {
         type: String,
@@ -12,13 +14,22 @@ const PassToken = new Schema({
     userId: {
         type: String,
         required: true,
+    },
+    validUntill: {
+        type: Date,
+        default: addOneHour
+    },
+});
+
+PassToken.pre('save', function(next) {
+    const currentTime = addOneHour();
+    this.updatedAt = currentTime;
+
+    if (this.isNew) {
+        this.createdAt = currentTime;
     }
-}, {
-    timestamps: {
-        createdAt: 'createdAt',
-        updatedAt: 'updatedAt',
-        currentTime: () => moment.tz('Africa/Tunis').format()
-    }
+
+    next();
 });
 
 export default model('PassToken', PassToken);
