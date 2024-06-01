@@ -1,13 +1,12 @@
-// controllers/facturation.controller.js
 import Facturation from '../models/Facturation.model.js';
 import Commande from '../models/commande.model.js';
 import Stripe from 'stripe';
 
-const stripe = new Stripe('votre_cle_secrete_stripe');
+const stripe = new Stripe('sk_test_51PMo9d02MJa5rkEb3YFBNKFcrS73Kylf2c3ZEidIO6ZPFUlMCijlEbSTmz6vO94DG1AZwj18aXwZo9b7cu1uDgBV00TCbrrLmj');
 
 // Créer une nouvelle facturation et un paiement via Stripe
 export const creerFacturation = async (req, res) => {
-    const { commandeId, montantTotal, reductions, taxes, methodePaiement, transactionId } = req.body;
+    const { commandeId, montantTotal, reductions, taxes, methodePaiement } = req.body;
 
     try {
         const commande = await Commande.findById(commandeId);
@@ -15,30 +14,29 @@ export const creerFacturation = async (req, res) => {
             return res.status(404).json({ message: "Commande non trouvée" });
         }
 
-        // Calculer le montant total avec réductions et taxes
-        const montantFinal = (montantTotal - reductions + taxes) * 100; // Montant en centimes pour Stripe
-
-        // Créer un paiement Stripe
+        const montantFinal = (montantTotal - reductions + taxes) * 100; 
+//apres cest pris du front-end :
         const paymentIntent = await stripe.paymentIntents.create({
             amount: montantFinal,
             currency: 'eur',
-            payment_method: transactionId,
-            confirm: true
+            payment_method_types: ['card'],
+            payment_method: 'pm_card_visa', 
+            confirm: true,
+            return_url: 'https://localhost:3000/confirmation' 
         });
-
-        const nouvelleFacturation = new FacturationModel({
+        
+        const nouvelleFacturation = new Facturation({
             commandeId,
             montantTotal,
             reductions,
             taxes,
             methodePaiement,
             statutPaiement: 'payé',
-            transactionId: paymentIntent.id
+            transactionId: paymentIntent.id // PaymentIntent ID
         });
 
         const facturationEnregistree = await nouvelleFacturation.save();
 
-        // Mettre à jour le statut de paiement de la commande
         commande.statutPaiement = 'payée';
         await commande.save();
 
@@ -48,17 +46,36 @@ export const creerFacturation = async (req, res) => {
     }
 };
 
-// Obtenir toutes les facturations
+
 export const obtenirFacturations = async (req, res) => {
     try {
-        const facturations = await Facturation.find().populate('commandeId');
+        let query = Facturation.find().populate('commandeId');
+
+        if (req.query.statutPaiement) {
+            query = query.where('statutPaiement').equals(req.query.statutPaiement);
+        }
+
+        if (req.query.dateFacturation) {
+            query = query.where('dateFacturation').equals(req.query.dateFacturation);
+        }
+
+        let sort = { montantTotal: 1 };
+        if (req.query.sortBy) {
+            if (req.query.sortBy === 'montantTotal') {
+                sort = { montantTotal: req.query.sortOrder === 'desc' ? -1 : 1 };
+            } else if (req.query.sortBy === 'dateFacturation') {
+                sort = { dateFacturation: req.query.sortOrder === 'desc' ? -1 : 1 };
+            }
+        }
+
+        const facturations = await query.sort(sort).exec();
         res.status(200).json(facturations);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
 
-// Obtenir une facturation par ID
+
 export const obtenirFacturationParId = async (req, res) => {
     const { id } = req.params;
 
@@ -73,7 +90,6 @@ export const obtenirFacturationParId = async (req, res) => {
     }
 };
 
-// Mettre à jour une facturation
 export const mettreAJourFacturation = async (req, res) => {
     const { id } = req.params;
     const { montantTotal, reductions, taxes, methodePaiement, statutPaiement, transactionId } = req.body;
@@ -108,7 +124,7 @@ export const supprimerFacturation = async (req, res) => {
             return res.status(404).json({ message: "Facturation non trouvée" });
         }
 
-        await facturation.remove();
+        await facturation.deleteOne();
         res.status(200).json({ message: "Facturation supprimée avec succès" });
     } catch (error) {
         res.status(500).json({ message: error.message });
