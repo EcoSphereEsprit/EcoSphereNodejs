@@ -7,7 +7,6 @@ const router = express.Router();
 // Route pour ajouter une commande
 router.post('/ajouter', [
     check('numCommande').notEmpty(),          // Vérifie que le numéro de commande n'est pas vide
-    check('userId').notEmpty(),              // Vérifie que l'ID de l'utilisateur n'est pas vide
     check('produits').notEmpty(),            // Vérifie que la liste des produits n'est pas vide
     check('infosLivraison').notEmpty(),      // Vérifie que les informations de livraison ne sont pas vides
     check('prixTotal').notEmpty(),           // Vérifie que le prix total n'est pas vide
@@ -23,7 +22,6 @@ router.get('/:id', commandeController.obtenirCommandeParId);
 // Route pour mettre à jour une commande
 router.put('/:id', [
     check('numCommande').notEmpty(),          // Vérifie que le numéro de commande n'est pas vide
-    check('userId').notEmpty(),              // Vérifie que l'ID de l'utilisateur n'est pas vide
     check('produits').notEmpty(),            // Vérifie que la liste des produits n'est pas vide
     check('infosLivraison').notEmpty(),      // Vérifie que les informations de livraison ne sont pas vides
     check('prixTotal').notEmpty(),           // Vérifie que le prix total n'est pas vide

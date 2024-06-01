@@ -16,7 +16,7 @@ const commandeSchema = new Schema({
     produits: [{
         idProduit: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Produit'
+            ref: 'Produits'
         },
         quantite: {
             type: Number,
