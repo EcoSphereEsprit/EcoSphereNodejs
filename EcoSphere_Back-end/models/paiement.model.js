@@ -3,9 +3,9 @@ import mongoose from 'mongoose';
 const { Schema, model } = mongoose;
 
 const paiementSchema = new Schema({
-    commandeId: {
+    facturationId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Commandes',
+        ref: 'Facturation',
         required: true
     },
     userId: {
@@ -19,21 +19,17 @@ const paiementSchema = new Schema({
     },
     methode: {
         type: String,
-        enum: ['carte_de_crédit', 'paypal', 'autre'],
+        enum: ['carte_de_crédit', 'paypal', 'livraison'],
         required: true
     },
-    statut: {
+   
+    dateLivraison: {
+        type: Date
+    },
+    statutLivraison: {
         type: String,
-        enum: ['en_attente', 'completé', 'échoué', 'remboursé'],
+        enum: ['en_attente', 'livré', 'annulé'],
         default: 'en_attente'
-    },
-    transactionId: {
-        type: String,
-        required: true
-    },
-    datePaiement: {
-        type: Date,
-        default: Date.now
     }
 });
 
