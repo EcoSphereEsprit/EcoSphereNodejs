@@ -157,7 +157,7 @@ export function logout(req, res){
  export const activateUser = async (req, res) => {
     try {
       const userId = req.params.id;
-      const updatedUser = await User.findByIdAndUpdate(userId, { isActivated : true }, { new: true });
+      await User.findByIdAndUpdate(userId, { isActivated : true }, { new: true });
       res.setHeader('Content-Type', 'text/html');
       return res.send(await sendBackValidationTemplate());
     } catch (err) {
@@ -204,7 +204,7 @@ export const resetPassWord = async (req, res) =>{
         }
         const salt = user.salt;
         const hashPassword = hashPassWordWithSalt(req.body.password, salt);
-        const updatedUser = await User.findByIdAndUpdate(
+        await User.findByIdAndUpdate(
             user._id,
             { password: hashPassword },
             { new: true }

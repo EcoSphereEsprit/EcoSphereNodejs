@@ -12,13 +12,10 @@ import couponRoutes from './routes/coupon.route.js'
 // produit
 import productRouter from './routes/produits.route.js'
 import categorieRouter from './routes/categories.route.js'
-
 import commandeRoutes from './routes/commande.route.js';
 import facturationRoutes from './routes/facturation.route.js';
 import paiementRoutes from './routes/paiement.route.js';
-import paiementModel from './models/paiement.model.js';
-import FacturationModel from './models/Facturation.model.js';
-import commandeModel from './models/commande.model.js';
+
 
 
 //Config env vars are fetched from this config file
