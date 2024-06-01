@@ -2,6 +2,13 @@ import mongoose from 'mongoose';
 
 const { Schema, model } = mongoose;
 
+const historiqueStatutSchema = new Schema({
+    date: { type: Date, default: Date.now },
+    statut: { type: String },
+    statutPaiement: { type: String },
+    statutLivraison: { type: String }
+});
+
 const commandeSchema = new Schema({
     numCommande: {
         type: String,
@@ -59,7 +66,7 @@ const commandeSchema = new Schema({
     },
     statut: {
         type: String,
-        enum: ['en_attente', 'confirmée', 'expédiée', 'livrée'],
+        enum: ['en_attente', 'confirmée', 'expédiée', 'livrée', 'annulée'],
         default: 'en_attente'
     },
     statutPaiement: {
@@ -72,6 +79,7 @@ const commandeSchema = new Schema({
         enum: ['en_attente', 'expédiée', 'livrée'],
         default: 'en_attente'
     },
+    historiqueStatuts: [historiqueStatutSchema], 
     prixTotal: {
         type: Number,
         required: true

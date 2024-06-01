@@ -5,7 +5,7 @@ const { Schema, model } = mongoose;
 const facturationSchema = new Schema({
     commandeId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Commande', 
+        ref: 'Commandes', 
         required: true
     },
     montantTotal: {
@@ -26,7 +26,7 @@ const facturationSchema = new Schema({
     },
     methodePaiement: {
         type: String,
-        enum: ['carte_de_crédit', 'paypal', 'autre'],
+        enum: ['carte_de_crédit', 'paypal', 'livraison'],
         required: true
     },
     statutPaiement: {
