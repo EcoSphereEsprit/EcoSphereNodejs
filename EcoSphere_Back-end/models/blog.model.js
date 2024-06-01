@@ -18,10 +18,8 @@ const blogSchema = new Schema({
     image: {
         type: String,
     },
-    comments: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Comment'
-    }]
+    comments: [{ type: Schema.Types.ObjectId, ref: 'Comment' }],
+    user: [{ type: Schema.Types.ObjectId, ref: 'User' }]
 });
 
 export default model('Blog', blogSchema);
