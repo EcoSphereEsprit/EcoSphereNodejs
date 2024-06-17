@@ -27,6 +27,7 @@ router
 router
     .route('/login')
     .get(login);
+ 
 
 router
     .route('/logout')
@@ -34,6 +35,10 @@ router
 router
     .route('/activateUser/:id')
     .get(activateUser);
+
+    
+    router.route('/login').post(login);
+
 router
     .route('/forgetpassword/:username')
     .post(forgotPassWord);

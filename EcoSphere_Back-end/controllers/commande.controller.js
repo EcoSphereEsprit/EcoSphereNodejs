@@ -1,34 +1,36 @@
 import { validationResult } from 'express-validator';
 import Commande from '../models/commande.model.js';
 
-// Ajouter une commande
+
+
 export const ajouterCommande = async (req, res) => {
     try {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-
-        const { numCommande, produits, infosLivraison, prixTotal, modePaiement, coupon, pourcentageRéduction } = req.body;
-        const userId = req.user.Id;  
-
-        const nouvelleCommande = new Commande({
-            numCommande,
-            userId,
-            produits,
-            infosLivraison,
-            prixTotal,
-            modePaiement,
-            coupon,
-            pourcentageRéduction,
-            historiqueStatuts: [{ date: new Date(), statut: 'en_attente' }]
-        });
-        const commandeEnregistree = await nouvelleCommande.save();
-        res.status(201).json(commandeEnregistree);
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+  
+      const { numCommande, produits, infosLivraison, prixTotal, modePaiement, coupon, pourcentageRéduction } = req.body;
+      const userId = req.user._id; // Ensure userId is correctly obtained from req.user._id
+  
+      const nouvelleCommande = new Commande({
+        numCommande,
+        userId,
+        produits,
+        infosLivraison,
+        prixTotal,
+        modePaiement,
+        coupon,
+        pourcentageRéduction,
+        historiqueStatuts: [{ date: new Date(), statut: 'en_attente' }]
+      });
+  
+      const commandeEnregistree = await nouvelleCommande.save();
+      res.status(201).json(commandeEnregistree);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+      res.status(500).json({ message: error.message });
     }
-};
+  };
 
 // Ajouter un historique de statut
 const ajouterHistoriqueStatut = async (commande, newStatuts) => {
@@ -42,13 +44,16 @@ const ajouterHistoriqueStatut = async (commande, newStatuts) => {
 // Obtenir toutes les commandes
 export const obtenirCommandes = async (req, res) => {
     try {
-        const commandes = await Commande.find().populate('userId').populate('produits.idProduit');
+        // Log req.user to verify contents
+        console.log('Decoded Token:', req.user);
+
+        // Fetch commandes for the authenticated user
+        const commandes = await Commande.find({ userId: req.user.Id }).populate('produits.idProduit');;
         res.status(200).json(commandes);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
-
 // Obtenir toutes les commandes avec recherche et filtrage
 export const obtenirCommandesFiltre = async (req, res) => {
     try {
@@ -82,54 +87,73 @@ export const obtenirCommandeParId = async (req, res) => {
 // Mettre à jour une commande
 export const mettreAJourCommande = async (req, res) => {
     try {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-
-        const commande = await Commande.findById(req.params.id);
-        if (!commande) {
-            return res.status(404).json({ message: "Commande non trouvée" });
-        }
-
-        Object.assign(commande, req.body);
-        await ajouterHistoriqueStatut(commande, req.body);
-        res.status(200).json(await commande.save());
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+  
+      const commande = await Commande.findById(req.params.id);
+      if (!commande) {
+        return res.status(404).json({ message: "Commande non trouvée" });
+      }
+  
+      // Check if the user has permission to update the command
+      if (req.user.role !== 'ADMIN' && commande.userId.toString() !== req.user._id) {
+        return res.status(403).json({ message: "Vous n'avez pas la permission de mettre à jour cette commande" });
+      }
+  
+      Object.assign(commande, req.body);
+      await ajouterHistoriqueStatut(commande, req.body);
+      res.status(200).json(await commande.save());
     } catch (error) {
-        res.status(500).json({ message: error.message });
+      res.status(500).json({ message: error.message });
     }
-};
+  };
+  
 
 // Supprimer une commande
 export const supprimerCommande = async (req, res) => {
     try {
-        const commande = await Commande.findByIdAndDelete(req.params.id);
-        if (!commande) {
-            return res.status(404).json({ message: "Commande non trouvée" });
-        }
-        res.status(200).json({ message: "Commande supprimée avec succès" });
+      const commande = await Commande.findByIdAndDelete(req.params.id);
+      if (!commande) {
+        return res.status(404).json({ message: "Commande non trouvée" });
+      }
+  
+      // Check if the user has permission to delete the command
+      if (req.user.role !== 'ADMIN' && commande.userId.toString() !== req.user._id) {
+        return res.status(403).json({ message: "Vous n'avez pas la permission de supprimer cette commande" });
+      }
+  
+      res.status(200).json({ message: "Commande supprimée avec succès" });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+      res.status(500).json({ message: error.message });
     }
-};
+  };
+  
 
 // Annuler une commande
 export const annulerCommande = async (req, res) => {
     try {
-        const commande = await Commande.findById(req.params.id);
-        if (!commande) {
-            return res.status(404).json({ message: "Commande non trouvée" });
-        }
-
-        if (commande.statut === 'expédiée' || commande.statut === 'livrée') {
-            return res.status(400).json({ message: "Impossible d'annuler une commande expédiée ou livrée" });
-        }
-
-        commande.statut = 'annulée';
-        await ajouterHistoriqueStatut(commande, { statut: 'annulée' });
-
-        res.status(200).json(await commande.save());
+      const commande = await Commande.findById(req.params.id);
+      if (!commande) {
+        return res.status(404).json({ message: "Commande non trouvée" });
+      }
+  
+      // Check if the user has permission to cancel the command
+      if (req.user.role !== 'ADMIN' && commande.userId.toString() !== req.user._id) {
+        return res.status(403).json({ message: "Vous n'avez pas la permission d'annuler cette commande" });
+      }
+  
+      if (commande.statut === 'expédiée' || commande.statut === 'livrée') {
+        return res.status(400).json({ message: "Impossible d'annuler une commande expédiée ou livrée" });
+      }
+  
+      commande.statut = 'annulée';
+      await ajouterHistoriqueStatut(commande, { statut: 'annulée' });
+  
+      res.status(200).json(await commande.save());
     } catch (error) {
-        res.status(500).json({ message: error.message });
+      res.status(500).json({ message: error.message });
     }
-};
+  };
+  

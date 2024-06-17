@@ -15,11 +15,8 @@ const commandeSchema = new Schema({
         required: true,
         unique: true
     },
-    userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
-    },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+
     produits: [{
         idProduit: {
             type: mongoose.Schema.Types.ObjectId,
