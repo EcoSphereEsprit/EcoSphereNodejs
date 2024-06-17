@@ -3,8 +3,9 @@ import Blog from '../models/blog.model.js';
 
 export const createBlog = async (req, res) => {
     try {
-        const { title, description, date, userID } = req.body;
-        const image = req.file.path; // Chemin d'accès temporaire de l'image téléchargée
+        const { title, description, date } = req.body;
+        const userID=req.user.Id;
+        const image = req?.file?.path; // Chemin d'accès temporaire de l'image téléchargée
 
         // Utilisez userID comme vous le souhaitez, par exemple, pour associer le blog à l'utilisateur
         console.log(userID);
@@ -51,7 +52,7 @@ export const updateBlog = async (req, res) => {
         }
         const blog = await Blog.findByIdAndUpdate(req.params.id, { title, description, date, image }, { new: true });
         if (blog) {
-            res.status(200).json(blog);
+            res.status(200).json({message:'Blog updated successfully'});
         } else {
             res.status(404).json({ error: 'Blog not found' });
         }
@@ -66,7 +67,7 @@ export const deleteBlog = async (req, res) => {
     try {
         const blog = await Blog.findByIdAndDelete(req.params.id);
         if (blog) {
-            res.status(204).json();
+            res.status(200).json({message:'Blog deleted successfully'});
         } else {
             res.status(404).json({ error: 'Blog not found' });
         }

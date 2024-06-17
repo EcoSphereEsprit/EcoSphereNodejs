@@ -18,6 +18,7 @@ const commentSchema = new Schema({
         ref: 'Blog',
         required: true,
       },
+      user: { type: Schema.Types.ObjectId, ref: 'User' }
 });
 
 export default model('Comment', commentSchema);
