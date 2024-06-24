@@ -23,6 +23,7 @@ export const ajouterCommande = async (req, res) => {
       modePaiement,
       coupon,
       pourcentageRéduction,
+      statutLivraison:'en_attente',
       historiqueStatuts: [{ date: new Date(), statut: 'en_attente' }]
     });
 
@@ -93,33 +94,7 @@ export const mettreAJourStatutPaiement = async (req, res) => {
   }
 };
 
-// Mettre à jour le statut de livraison d'une commande
-// Mettre à jour le statut de livraison d'une commande
 
-export const mettreAJourStatutLivraison = async (req, res) => {
-  try {
-    const { statutLivraison } = req.body;
-
-    const commande = await Commande.findById(req.params.id);
-    if (!commande) {
-      return res.status(404).json({ message: "Commande non trouvée" });
-    }
-
-    // Vérifier si l'utilisateur est administrateur
-    if (req.user.role !== 'ADMIN') {
-      return res.status(403).json({ message: "Vous n'avez pas la permission de mettre à jour le statut de livraison" });
-    }
-
-    // Mettre à jour le statut de livraison directement
-    commande.statutLivraison = statutLivraison;
-
-    // Enregistrer la commande mise à jour
-    const commandeMiseAJour = await commande.save();
-    res.status(200).json(commandeMiseAJour);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
 
 
 // Supprimer une commande en conservant l'historique
@@ -132,7 +107,6 @@ export const supprimerCommandeAvecHistorique = async (req, res) => {
 
       await commande.remove(); // Supprimer la commande de la base de données
 
-      // Vous pouvez ajouter du code ici pour archiver l'historique de la commande supprimée si nécessaire
 
       res.status(200).json({ message: "Commande supprimée avec succès" });
   } catch (error) {
@@ -202,27 +176,59 @@ export const supprimerCommande = async (req, res) => {
 
 // Annuler une commande
 export const annulerCommande = async (req, res) => {
-    try {
+  try {
       const commande = await Commande.findById(req.params.id);
       if (!commande) {
-        return res.status(404).json({ message: "Commande non trouvée" });
+          return res.status(404).json({ message: "Commande non trouvée" });
       }
-  
+
       // Check if the user has permission to cancel the command
-      if (req.user.role !== 'USER' && commande.userId.toString() !== req.user._id) {
-        return res.status(403).json({ message: "Vous n'avez pas la permission d'annuler cette commande" });
+      if (req.user.role !== 'ADMIN' && commande.userId.toString() !== req.user._id) {
+          return res.status(403).json({ message: "Vous n'avez pas la permission d'annuler cette commande" });
       }
-  
-      if (commande.statut === 'expédiée' || commande.statut === 'livrée') {
-        return res.status(400).json({ message: "Impossible d'annuler une commande expédiée ou livrée" });
+
+      if (commande.statutLivraison === 'expédiée' || commande.statutLivraison === 'livrée') {
+          return res.status(400).json({ message: "Impossible d'annuler une commande expédiée ou livrée" });
       }
-  
-      commande.statut = 'annulée';
-      await ajouterHistoriqueStatut(commande, { statut: 'annulée' });
-  
-      res.status(200).json(await commande.save());
-    } catch (error) {
+
+      commande.statutLivraison = 'annulée';
+      await commande.save();
+
+      res.status(200).json(commande);
+  } catch (error) {
       res.status(500).json({ message: error.message });
-    }
-  };
-  
+  }
+};
+
+export const mettreAJourStatutLivraison = async (req, res) => {
+  try {
+      console.log('Request body:', req.body); // Log request body
+
+      const { statutLivraison } = req.body;
+
+      // Check if statutLivraison is defined in the request body
+      if (!statutLivraison) {
+          return res.status(400).json({ message: "Le champ 'statutLivraison' est requis" });
+      }
+
+      const commande = await Commande.findById(req.params.id);
+      if (!commande) {
+          return res.status(404).json({ message: "Commande non trouvée" });
+      }
+
+      // Log user and commande details
+      console.log('req.user:', req.user);
+      console.log('commande:', commande);
+
+ 
+      // Mettre à jour le statut de livraison directement
+      commande.statutLivraison = statutLivraison;
+      const commandeMiseAJour = await commande.save();
+
+      res.status(200).json(commandeMiseAJour);
+  } catch (error) {
+      console.error('Error updating statutLivraison:', error); 
+      res.status(500).json({ message: error.message });
+  }
+};
+
