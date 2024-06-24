@@ -26,7 +26,7 @@ router
 
 router
     .route('/login')
-    .get(login);
+    .post(login);
  
 
 router

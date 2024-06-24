@@ -16,12 +16,18 @@ router.post('/ajouter', authenticateToken, [
 
 // Route pour obtenir toutes les commandes
 router.get('/', authenticateToken, commandeController.obtenirCommandes);
+router.get('/admin', authenticateToken, (req, res) => {
+  if (req.user.role !== 'ADMIN') {
+    return res.status(403).json({ message: "Vous n'êtes pas autorisé à accéder à cette ressource" });
+  }
+  commandeController.obtenirToutesLesCommandes(req, res);
+});
 
 // Route pour obtenir une commande par ID
 router.get('/:id', authenticateToken, commandeController.obtenirCommandeParId);
 
 // Route pour obtenir toutes les commandes avec recherche et filtrage
-router.get('/', authenticateToken, commandeController.obtenirCommandesFiltre);
+router.get('/filtre', authenticateToken, commandeController.obtenirCommandesFiltre);
 
 // Route pour mettre à jour une commande
 router.put('/:id', authenticateToken, [
@@ -37,5 +43,7 @@ router.delete('/:id', authenticateToken, commandeController.supprimerCommande);
 
 // Route pour annuler une commande
 router.put('/:id/annuler', authenticateToken, commandeController.annulerCommande);
+// Route pour mettre à jour le statut de livraison d'une commande
+router.put('/:id/statut-livraison', authenticateToken, commandeController.mettreAJourStatutLivraison);
 
 export default router;

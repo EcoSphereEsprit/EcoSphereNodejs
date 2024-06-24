@@ -1,37 +1,37 @@
 import { validationResult } from 'express-validator';
 import Commande from '../models/commande.model.js';
+import { creerFacturation } from './facturation.controller.js';
+
+
 
 
 
 export const ajouterCommande = async (req, res) => {
-    try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-      }
-  
-      const { numCommande, produits, infosLivraison, prixTotal, modePaiement, coupon, pourcentageRéduction } = req.body;
-      const userId = req.user._id; // Ensure userId is correctly obtained from req.user._id
-  
-      const nouvelleCommande = new Commande({
-        numCommande,
-        userId,
-        produits,
-        infosLivraison,
-        prixTotal,
-        modePaiement,
-        coupon,
-        pourcentageRéduction,
-        historiqueStatuts: [{ date: new Date(), statut: 'en_attente' }]
-      });
-  
-      const commandeEnregistree = await nouvelleCommande.save();
-      res.status(201).json(commandeEnregistree);
-    } catch (error) {
-      res.status(500).json({ message: error.message });
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
-  };
 
+    const { numCommande, produits, infosLivraison, prixTotal, modePaiement, coupon, pourcentageRéduction } = req.body;
+
+    const nouvelleCommande = new Commande({
+      numCommande,
+      produits,
+      infosLivraison,
+      prixTotal,
+      modePaiement,
+      coupon,
+      pourcentageRéduction,
+      historiqueStatuts: [{ date: new Date(), statut: 'en_attente' }]
+    });
+
+    const commandeEnregistree = await nouvelleCommande.save();
+    return res.status(201).json(commandeEnregistree); // Utilisation de return pour arrêter l'exécution
+  } catch (error) {
+    return res.status(500).json({ message: error.message }); // Utilisation de return pour arrêter l'exécution
+  }
+};
 // Ajouter un historique de statut
 const ajouterHistoriqueStatut = async (commande, newStatuts) => {
     commande.historiqueStatuts.push({
@@ -42,18 +42,21 @@ const ajouterHistoriqueStatut = async (commande, newStatuts) => {
 };
 
 // Obtenir toutes les commandes
+// Modifier la fonction obtenirCommandes pour gérer à la fois les utilisateurs et les admins
 export const obtenirCommandes = async (req, res) => {
-    try {
-        // Log req.user to verify contents
-        console.log('Decoded Token:', req.user);
-
-        // Fetch commandes for the authenticated user
-        const commandes = await Commande.find({ userId: req.user.Id }).populate('produits.idProduit');;
-        res.status(200).json(commandes);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+  try {
+    let commandes;
+    if (req.user.role === 'ADMIN') {
+      commandes = await Commande.find().populate('userId').populate('produits.idProduit');
+    } else {
+      commandes = await Commande.find({ userId: req.user._id }).populate('produits.idProduit');
     }
+    res.status(200).json(commandes);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
+
 // Obtenir toutes les commandes avec recherche et filtrage
 export const obtenirCommandesFiltre = async (req, res) => {
     try {
@@ -69,6 +72,72 @@ export const obtenirCommandesFiltre = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
+};
+// Mettre à jour le statut de paiement d'une commande
+export const mettreAJourStatutPaiement = async (req, res) => {
+  try {
+      const { statutPaiement } = req.body;
+
+      const commande = await Commande.findById(req.params.id);
+      if (!commande) {
+          return res.status(404).json({ message: "Commande non trouvée" });
+      }
+
+      commande.statutPaiement = statutPaiement;
+      await ajouterHistoriqueStatut(commande, { statutPaiement });
+      
+      const commandeMiseAJour = await commande.save();
+      res.status(200).json(commandeMiseAJour);
+  } catch (error) {
+      res.status(500).json({ message: error.message });
+  }
+};
+
+// Mettre à jour le statut de livraison d'une commande
+// Mettre à jour le statut de livraison d'une commande
+
+export const mettreAJourStatutLivraison = async (req, res) => {
+  try {
+    const { statutLivraison } = req.body;
+
+    const commande = await Commande.findById(req.params.id);
+    if (!commande) {
+      return res.status(404).json({ message: "Commande non trouvée" });
+    }
+
+    // Vérifier si l'utilisateur est administrateur
+    if (req.user.role !== 'ADMIN') {
+      return res.status(403).json({ message: "Vous n'avez pas la permission de mettre à jour le statut de livraison" });
+    }
+
+    // Mettre à jour le statut de livraison directement
+    commande.statutLivraison = statutLivraison;
+
+    // Enregistrer la commande mise à jour
+    const commandeMiseAJour = await commande.save();
+    res.status(200).json(commandeMiseAJour);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+// Supprimer une commande en conservant l'historique
+export const supprimerCommandeAvecHistorique = async (req, res) => {
+  try {
+      const commande = await Commande.findById(req.params.id);
+      if (!commande) {
+          return res.status(404).json({ message: "Commande non trouvée" });
+      }
+
+      await commande.remove(); // Supprimer la commande de la base de données
+
+      // Vous pouvez ajouter du code ici pour archiver l'historique de la commande supprimée si nécessaire
+
+      res.status(200).json({ message: "Commande supprimée avec succès" });
+  } catch (error) {
+      res.status(500).json({ message: error.message });
+  }
 };
 
 // Obtenir une commande par ID
@@ -140,7 +209,7 @@ export const annulerCommande = async (req, res) => {
       }
   
       // Check if the user has permission to cancel the command
-      if (req.user.role !== 'ADMIN' && commande.userId.toString() !== req.user._id) {
+      if (req.user.role !== 'USER' && commande.userId.toString() !== req.user._id) {
         return res.status(403).json({ message: "Vous n'avez pas la permission d'annuler cette commande" });
       }
   

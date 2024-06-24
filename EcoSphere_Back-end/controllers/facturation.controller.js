@@ -5,6 +5,9 @@ import Stripe from 'stripe';
 const stripe = new Stripe('sk_test_51PMo9d02MJa5rkEb3YFBNKFcrS73Kylf2c3ZEidIO6ZPFUlMCijlEbSTmz6vO94DG1AZwj18aXwZo9b7cu1uDgBV00TCbrrLmj');
 
 // Créer une nouvelle facturation et un paiement via Stripe
+
+
+// Créer une nouvelle facturation et un paiement via Stripe
 export const creerFacturation = async (req, res) => {
     const { commandeId, montantTotal, reductions, taxes, methodePaiement } = req.body;
 
@@ -15,37 +18,47 @@ export const creerFacturation = async (req, res) => {
         }
 
         const montantFinal = (montantTotal - reductions + taxes) * 100; 
-//apres cest pris du front-end :
-        const paymentIntent = await stripe.paymentIntents.create({
-            amount: montantFinal,
-            currency: 'eur',
-            payment_method_types: ['card'],
-            payment_method: 'pm_card_visa', 
-            confirm: true,
-            return_url: 'https://localhost:3000/confirmation' 
-        });
-        
+
+        let paymentIntent;
+        if (methodePaiement === 'carte_de_crédit') {
+            paymentIntent = await stripe.paymentIntents.create({
+                amount: montantFinal,
+                currency: 'eur',
+                payment_method_types: ['card'],
+                payment_method: 'pm_card_visa', 
+                confirm: true,
+                return_url: 'https://localhost:3000/confirmation' 
+            });
+        }
+
         const nouvelleFacturation = new Facturation({
             commandeId,
             montantTotal,
             reductions,
             taxes,
             methodePaiement,
-            statutPaiement: 'payé',
-            transactionId: paymentIntent.id // PaymentIntent ID
+            statutPaiement: methodePaiement === 'carte_de_crédit' ? 'payé' : 'en_attente',
+            transactionId: paymentIntent ? paymentIntent.id : null // PaymentIntent ID ou null pour autres méthodes de paiement
         });
 
         const facturationEnregistree = await nouvelleFacturation.save();
 
-        commande.statutPaiement = 'payée';
+        commande.statutPaiement = methodePaiement === 'carte_de_crédit' ? 'payée' : 'en_attente';
         await commande.save();
 
-        res.status(201).json(facturationEnregistree);
+        if (res) {
+            res.status(201).json(facturationEnregistree);
+        } else {
+            return facturationEnregistree;
+        }
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        if (res) {
+            res.status(500).json({ message: error.message });
+        } else {
+            throw new Error(error.message);
+        }
     }
 };
-
 
 export const obtenirFacturations = async (req, res) => {
     try {
