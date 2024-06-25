@@ -43,6 +43,7 @@ app.use('/produit', productRouter);
 //categories routes
 app.use('/categories', categorieRouter);
 
+app.use('/commandes', commandeRoutes);
 
 app.use('/img', imgRoutes)
 app.use('/blogs', blogRoutes)
@@ -56,7 +57,6 @@ const __dirname = path.dirname(__filename);
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
 app.use('/img', express.static('./public/images'));
-app.use('/commandes', commandeRoutes);
 app.use('/facturation', facturationRoutes);
 app.use('/paiement', paiementRoutes);
 app.use('/user', userRoutes);

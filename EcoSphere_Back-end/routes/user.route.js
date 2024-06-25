@@ -1,6 +1,6 @@
 import express from 'express';
 import { body } from 'express-validator';
-import { SignUp, findAll, getOneById, getOneByUserName, login, logout, activateUser, forgotPassWord, resetPassWord } from '../controllers/user.controller.js';
+import { SignUp, findAll, getOneById, getOneByUserName, login, logout, activateUser, forgotPassWord, resetPassWord, Get2FACode } from '../controllers/user.controller.js';
 import multer from '../middlewares/multer-config.js';
 const router = express.Router();
 
@@ -48,4 +48,6 @@ router.route('/').get(findAll);
 
 router.route('/:username').get(getOneByUserName);
 
+
+router.route('/get2FaId/:id').get(Get2FACode);
 export default router;
