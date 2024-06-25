@@ -19,7 +19,8 @@ export function errorHandler(err, req, res, next) {
 
 export function authenticateToken(req, res, next) {
     if (req.path.includes('/login') || req.path.includes('/logout') || req.path.includes('/signup')
-        || req.path.includes('/activateUser') || req.path.includes('/forgetpassword') || req.path.includes('/resetpassword')|| req.path.includes('/blogs/getAll')|| req.path.includes('/blogs/getId')|| req.path.includes('/comments/getAll') || req.path.includes('/comments/getComment')) {
+
+        || req.path.includes('/activateUser') || req.path.includes('/forgetpassword') || req.path.includes('/resetpassword')|| req.path.includes('/blogs/getAll')|| req.path.includes('/blogs/getId')|| req.path.includes('/comments/getAll') || req.path.includes('/comments/getComment') || req.path.includes('/img')) {
         return next();
     }
 

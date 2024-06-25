@@ -14,15 +14,11 @@ export function addProduit(req, res) {
         prix: prix,
         quantite_stock: quantite_stock,
         categorie: categorie,
-        // image : `${req.protocol}://${req.get('host')}/img/${req.file.filename}`,
+        image : `${req.protocol}://${req.get('host')}/img/${req.file.filename}`,
         brand: brand,
         couleur: couleur,
         available: available,
     };
-
-    if (req.file) {
-        produitData.image = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
-    }
 
     Produits.create(produitData)
         .then(async newProduit => {
