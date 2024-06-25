@@ -101,7 +101,6 @@ export function getOneById (req, res){
     })
 }
 
-// Existing login function in your backend
 export function login(req, res) {
     const { username, password } = req.body;
 
@@ -119,8 +118,7 @@ export function login(req, res) {
           return res.status(401).json({ message: 'Incorrect username or password' });
         }
         if(LoggedInUsers.has(user.username)){
-
-            return res.status(200).json({message : 'User already logged in', token : LoggedInUsers.get(user.username), role : user.role, user_id: user._id});
+            return res.status(200).json({message : 'User already logged in' , token : LoggedInUsers.get(user.username), role : user.role, userId : user._id})
         }
 
         const claims = {
@@ -131,13 +129,12 @@ export function login(req, res) {
         let token = GetValidJwt(claims);
         LoggedInUsers.set(user.username, token);
   
-
-        res.status(200).json({ message: 'Login successful', token: token, role : user.role, user_id : user._id});
+        res.status(200).json({ message: 'Login successful', token: token, role : user.role, userId : user._id, avatrUrl : user.image});
       })
       .catch(err => {
         res.status(500).json({ message: 'Internal server error', error: err });
       });
-}
+  }
 
 export function logout(req, res){
     const authHeader = req.headers['authorization'];
@@ -215,7 +212,7 @@ export const forgotPassWord = async (req, res) =>{
     }
     catch(err){
         console.error(err);
-        res.status(500).json({message : 'inetrnal server error'} ) 
+        res.status(500).json({message : 'inetrnal server error'}  )
     }
 }
 
@@ -271,8 +268,8 @@ export const resetPassWord = async (req, res) =>{
         console.error(err);
         res.status(500).json({message : 'inetrnal server error'})
     }
-
 }
+
 export const disactivaetUser = async (req, res) => {
     try {
         if(req.user.role != RoleEnum.ADMIN){
@@ -327,4 +324,3 @@ export async function updateUser(req, res) {
         return res.status(500).json(err);
     }
 }
-

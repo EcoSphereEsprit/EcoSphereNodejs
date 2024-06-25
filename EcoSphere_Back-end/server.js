@@ -1,4 +1,6 @@
 import express from 'express'
+import path from 'path'
+import { fileURLToPath } from 'url'
 import morgan from 'morgan'
 import cors from 'cors'
 import { InitDbSetup } from './config/DataBaseSetUp.js'
@@ -6,7 +8,7 @@ import userRoutes from './routes/user.route.js'
 import commentRoutes from './routes/comment.route.js'
 import blogRoutes from './routes/blog.route.js'
 import imgRoutes from './routes/img.route.js'
-import { notFoundError, errorHandler, authenticateToken } from './middlewares/errorhandler.js'
+import { notFoundError, errorHandler, /*authenticateToken*/ } from './middlewares/errorhandler.js'
 import * as fs from 'fs';
 import couponRoutes from './routes/coupon.route.js'
 // produit
@@ -31,7 +33,7 @@ app.use(express.json())
 //Only use in dev envirement
 app.use(morgan('dev'))
 
-app.use(authenticateToken);
+//app.use(authenticateToken);
 app.use('/user', userRoutes)
 
 //merge
@@ -49,8 +51,11 @@ app.use('/coupon', couponRoutes)
 app.use('/user', userRoutes)
 app.use(notFoundError)
 app.use(errorHandler)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
-app.use('/img', express.static('.\public\images'));
+app.use('/img', express.static('./public/images'));
 app.use('/commandes', commandeRoutes);
 app.use('/facturation', facturationRoutes);
 app.use('/paiement', paiementRoutes);

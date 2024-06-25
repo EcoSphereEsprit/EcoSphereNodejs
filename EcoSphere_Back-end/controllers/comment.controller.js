@@ -5,7 +5,7 @@ import Comment from '../models/comment.model.js';
 
 export const createComment = async (req, res) => {
     try {
-        const { content, date } = req.body;
+        const { content, date,user } = req.body;
         const { blogId } = req.params; // Identifiant du blog auquel le commentaire est associé
 
         // Récupérer le blog auquel ajouter le commentaire
@@ -13,9 +13,9 @@ export const createComment = async (req, res) => {
         if (!blog) {
             return res.status(404).json({ error: 'Blog not found' });
         }
-        const userId = req.user.Id;
+        //const userId = req.user.Id;
         // Créer le commentaire
-        const comment = new Comment({ content, date, blog: blogId, user: userId });
+        const comment = new Comment({ content, date, blog: blogId, user/*: userId */});
         await comment.save();
 
         // Ajouter le commentaire à la liste des commentaires du blog
@@ -83,5 +83,23 @@ export const deleteComment = async (req, res) => {
     }
 };
 
+export const getCommentsByBlogId = async (req, res) => {
+    try {
+        const { blogId } = req.params;
+        
+        // Find the blog by its ID
+        const blog = await Blog.findById(blogId);
+        if (!blog) {
+            return res.status(404).json({ error: 'Blog not found' });
+        }
+        
+        // Find comments associated with the blog
+        const comments = await Comment.find({ blog: blogId });
+        
+        res.status(200).json(comments);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
 
  

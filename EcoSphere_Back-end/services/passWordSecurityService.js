@@ -13,6 +13,3 @@ import { randomBytes, pbkdf2Sync } from 'crypto';
   return hash;
 
  }
- export function generateRandomNumberString() {
-    return Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-}
