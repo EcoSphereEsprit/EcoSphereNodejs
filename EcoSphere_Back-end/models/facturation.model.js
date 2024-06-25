@@ -36,7 +36,6 @@ const facturationSchema = new Schema({
     },
     transactionId: {
         type: String,
-        required: true
     }
 });
 
