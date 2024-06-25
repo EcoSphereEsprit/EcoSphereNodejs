@@ -3,6 +3,8 @@ import PassToken from '../models/PassToken.js'
 import RoleEnum from '../models/roleEnum.js'
 import Mfa from '../models/user.2FAmodel.js'
 import moment from 'moment-timezone';
+import { isBefore, isAfter, isEqual } from 'date-fns';
+
 import { validationResult } from 'express-validator'
 import {GetValidJwt} from '../services/JwtService.js'
 import {generateSalt, hashPassWordWithSalt, generateRandomNumberString} from '../services/passWordSecurityService.js'
@@ -63,37 +65,6 @@ export async function SignUp(req, res) {
 
         await sendActivationMail(newUser.email, `Hi ${newUser.username} activate your ecoSphere account and enjoy the journy!`,replacements);
 
-        return res.status(201).json(newUser);
-    } catch (err) {
-        return res.status(500).json(err);
-    }
-}
-
-export async function CreateAdmin(req, res) {
-    if(req.user.role != RoleEnum.ADMIN){
-        return res.status(403).json({message : 'unauthorized for this type of user'});
-    }
-    if (!validationResult(req).isEmpty()) {
-        return res.status(400).json({ errors: validationResult(req).array() });
-    }
-
-    const salt = generateSalt();
-    try {
-        const isUserNameUsed = await User.findOne({ username: req.body.username });
-        if (isUserNameUsed) {
-            return res.status(409).json({ error: 'Username already taken' });
-        }
-
-        const newUser = await User.create({
-            username: req.body.username,
-            email: req.body.email,
-            role: RoleEnum.ADMIN,
-            password: hashPassWordWithSalt(req.body.password, salt),
-            salt: salt,
-            isActivated : true,
-            phoneNumber: req.body.phoneNumber,
-            image: `${req.protocol}://${req.get('host')}/img/${req.file.filename}`
-        });
         return res.status(201).json(newUser);
     } catch (err) {
         return res.status(500).json(err);
@@ -166,30 +137,24 @@ export function login(req, res) {
   }
 
 export function logout(req, res){
-    try{
-        const authHeader = req.headers['authorization'];
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            return res.status(401).json({ message: 'Authorization token is required' });
-        }
-        const token = authHeader.split(' ')[1];
-        BlackList.add(token);
-        for (let [key, value] of LoggedInUsers) {
-            if (value === token) {
-                LoggedInUsers.delete(key);
-            }
-        }
-        res.status(200).json({ message: 'logout successful', token: token });
+    const authHeader = req.headers['authorization'];
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ message: 'Authorization token is required' });
     }
-    catch(err){
-        console.error(err);
-        res.status(500).json({message : 'inetrnal server error'})
+    const token = authHeader.split(' ')[1];
+    BlackList.add(token);
+    for (let [key, value] of LoggedInUsers) {
+        if (value === token) {
+            LoggedInUsers.delete(key);
+        }
     }
+    res.status(200).json({ message: 'logout successful', token: token });
 }
 
  export const activateUser = async (req, res) => {
     try {
       const userId = req.params.id;
-      await User.findByIdAndUpdate(userId, { isActivated : true }, { new: true });
+      const updatedUser = await User.findByIdAndUpdate(userId, { isActivated : true }, { new: true });
       res.setHeader('Content-Type', 'text/html');
       return res.send(await sendBackValidationTemplate());
     } catch (err) {
@@ -224,6 +189,7 @@ export const verify2FACode = async (req, res) => {
 }
 
 export const forgotPassWord = async (req, res) =>{
+
     try{
         var user = await User.findOne({ username : req.params.username});
         if(user){
@@ -246,7 +212,7 @@ export const forgotPassWord = async (req, res) =>{
     }
     catch(err){
         console.error(err);
-        res.status(500).json({message : 'inetrnal server error'})
+        res.status(500).json({message : 'inetrnal server error'}  
     }
 }
 
@@ -271,10 +237,13 @@ export const checkToken = async (req, res) =>{
         }
 }
 export const resetPassWord = async (req, res) =>{
-    try{
-    var validatedToken = await PassToken.findOne({token : req.params.token});   
-    const addOneHour = () => moment.tz('Africa/Tunis').add(1, 'hour').toDate();
-    const now = addOneHour();
+    var validatedToken = await PassToken.findOne({token : req.params.token});
+    let now = new Date();
+    
+    const timeZoneOffset = -60; // Tunisia is 1 hour ahead of UTC
+    
+    now.setMinutes(now.getMinutes() + timeZoneOffset);
+    now.setMinutes(now.getMinutes() + 20); //add 20 mins check for token TTL
     console.log(now);
     if(validatedToken.validUntill > now){
         const user = await User.findById(validatedToken.userId);
@@ -311,7 +280,6 @@ export const disactivaetUser = async (req, res) => {
 
     } catch (err) {
         return res.status(500).json({message : "something is wrong contact us for more info thank you"});
-
     }
 }
 

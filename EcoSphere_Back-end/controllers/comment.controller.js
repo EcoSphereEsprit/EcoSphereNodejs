@@ -13,9 +13,9 @@ export const createComment = async (req, res) => {
         if (!blog) {
             return res.status(404).json({ error: 'Blog not found' });
         }
-
+        const userId = req.user.Id;
         // Créer le commentaire
-        const comment = new Comment({ content, date, blog: blogId });
+        const comment = new Comment({ content, date, blog: blogId, user: userId });
         await comment.save();
 
         // Ajouter le commentaire à la liste des commentaires du blog
@@ -54,7 +54,7 @@ export const updateComment = async (req, res) => {
     try {
         const comment = await Comment.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (comment) {
-            res.status(200).json(comment);
+            res.status(200).json({message:'Comment updated successfully'});
         } else {
             res.status(404).json({ error: 'Comment not found' });
         }
@@ -74,7 +74,7 @@ export const deleteComment = async (req, res) => {
                 blog.comments.pull(req.params.id);
                 await blog.save();
             }
-            res.status(204).json();
+            res.status(200).json({message:'Comment deleted successfully'});
         } else {
             res.status(404).json({ error: 'Comment not found' });
         }

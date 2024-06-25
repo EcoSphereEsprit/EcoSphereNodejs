@@ -1,19 +1,20 @@
+// routes/commentRoutes.js
 import express from 'express';
+
 import {
     createComment,
     getAllComments,
     getCommentById,
     updateComment,
     deleteComment
-} from '../controllers/comment.controller.js';
 
+
+} from '../controllers/comment.controller.js';
 const router = express.Router();
 
-// Routes pour les commentaires
-router.post('/', createComment);
-router.get('/', getAllComments);
-router.get('/:id', getCommentById);
-router.patch('/:id', updateComment);
+router.post('/:blogId', createComment);
+router.get('/getAll', getAllComments);
+router.get('/getComment/:id', getCommentById);
+router.put('/:id', updateComment);
 router.delete('/:id', deleteComment);
-
 export default router;

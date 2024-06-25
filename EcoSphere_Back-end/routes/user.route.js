@@ -1,8 +1,10 @@
 import express from 'express';
 import { body } from 'express-validator';
+
 import { SignUp, findAll, getOneById, getOneByUserName, login, logout,
      activateUser, forgotPassWord, resetPassWord, CreateAdmin, disactivaetUser,
       checkToken, Get2FACode, verify2FACode, updateUser } from '../controllers/user.controller.js';
+
 import multer from '../middlewares/multer-config.js';
 const router = express.Router();
 
@@ -46,5 +48,6 @@ router.route('/:username').get(getOneByUserName);
 router.route('/createadmin').post(CreateAdmin);
 router.route('/disactivaetUser/:id').post(disactivaetUser);
 router.route('/updateuser/:userId').patch(multer,updateUser)
+
 
 export default router;
