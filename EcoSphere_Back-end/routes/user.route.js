@@ -1,22 +1,20 @@
 import express from 'express';
 import { body } from 'express-validator';
-import { SignUp, findAll, getOneById, getOneByUserName, login, logout, activateUser, forgotPassWord, resetPassWord, Get2FACode } from '../controllers/user.controller.js';
+import { SignUp, findAll, getOneById, getOneByUserName, login, logout, activateUser, forgotPassWord, resetPassWord, Get2FACode, updateUser, verify2FACode, checkToken } from '../controllers/user.controller.js';
 import multer from '../middlewares/multer-config.js';
 const router = express.Router();
 
 router
     .route('/signup')
     .post(multer,
-        body('username').isLength({ min: 5, max: 50 }),
-        body('password').isLength({ min: 6, max: 16 }),
-        body('phoneNumber').isLength({ min: 8, max: 8 }),
         SignUp)
 
 router
     .route('/')
     .get(findAll);
-
-router
+router.route('/chechToken/:token').get(checkToken);
+router.route('/verify2FACode/:id/:code').get(verify2FACode);
+router.get('/')
     .route('/getone/:username')
     .get(getOneByUserName);
 router
@@ -40,14 +38,18 @@ router
 router
     .route('/forgetpassword/:username')
     .post(forgotPassWord);
+
 router
-    .route('/resetpassword/:id/:token')
+    .route('/forgetpassword/:username')
+    .post(forgotPassWord);
+
+router
+    .route('/resetpassword/:token')
     .post(resetPassWord);
 
 router.route('/').get(findAll);
-
 router.route('/:username').get(getOneByUserName);
-
+router.route('/updateuser/:userId').patch(multer,updateUser);
 
 router.route('/get2FaId/:id').get(Get2FACode);
 export default router;

@@ -237,7 +237,9 @@ export const checkToken = async (req, res) =>{
         }
 }
 export const resetPassWord = async (req, res) =>{
-    try{var validatedToken = await PassToken.findOne({token : req.params.token});
+    try{
+    var validatedToken = await PassToken.findOne({token : req.params.token});
+    console.log(validatedToken);
     let now = new Date();
     
     const timeZoneOffset = -60; // Tunisia is 1 hour ahead of UTC
