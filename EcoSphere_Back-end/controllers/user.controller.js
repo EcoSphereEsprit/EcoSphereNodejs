@@ -1,11 +1,14 @@
 import User from '../models/user.model.js'
 import PassToken from '../models/PassToken.js'
 import RoleEnum from '../models/roleEnum.js'
+import Mfa from '../models/user.2FAmodel.js'
+import moment from 'moment-timezone';
 import { isBefore, isAfter, isEqual } from 'date-fns';
+
 import { validationResult } from 'express-validator'
 import {GetValidJwt} from '../services/JwtService.js'
-import {generateSalt, hashPassWordWithSalt} from '../services/passWordSecurityService.js'
-import {sendActivationMail, sendBackValidationTemplate, sendPasswordModificationMail} from '../services/mailService.js'
+import {generateSalt, hashPassWordWithSalt, generateRandomNumberString} from '../services/passWordSecurityService.js'
+import {sendActivationMail, sendBackValidationTemplate, sendPasswordModificationMail, send2faCode} from '../services/mailService.js'
 export var BlackList = new Set();
 export var LoggedInUsers = new Map();
 
@@ -115,7 +118,7 @@ export function login(req, res) {
           return res.status(401).json({ message: 'Incorrect username or password' });
         }
         if(LoggedInUsers.has(user.username)){
-            return res.status(200).json({message : 'User already logged in' , token : LoggedInUsers.get(user.username), role : user.role})
+            return res.status(200).json({message : 'User already logged in' , token : LoggedInUsers.get(user.username), role : user.role, userId : user._id})
         }
 
         const claims = {
@@ -126,7 +129,7 @@ export function login(req, res) {
         let token = GetValidJwt(claims);
         LoggedInUsers.set(user.username, token);
   
-        res.status(200).json({ message: 'Login successful', token: token, role : user.role, userId : user._id});
+        res.status(200).json({ message: 'Login successful', token: token, role : user.role, userId : user._id, avatrUrl : user.image});
       })
       .catch(err => {
         res.status(500).json({ message: 'Internal server error', error: err });
@@ -160,21 +163,79 @@ export function logout(req, res){
     }
 }
 
+export const Get2FACode = async (req, res) => {
+    const my2fa =generateRandomNumberString(4);
+    const mfaobject = await Mfa.create({
+        code : my2fa
+    });
+    const user = await User.findOne({_id : req.params.id})
+    const replacements = {
+        name: user.username,
+        code: mfaobject.code
+    };
+    await send2faCode(user.email, 'your 2fa code is here !', replacements)
+    return res.status(200).json({MFACode : mfaobject._id, userMail : user.email});
+}
+
+export const verify2FACode = async (req, res) => {
+    var mfaObject = await Mfa.findOne({_id : req.params.id});
+    if(mfaObject.code == req.params.code){
+        return res.status(200).json({verification : true});
+    }
+    else{
+        return res.status(401).json({verification : false});
+    }
+    
+}
+
 export const forgotPassWord = async (req, res) =>{
-    var user = await User.findOne({ username : req.params.username});
-    if(user){
-        var token = await PassToken.create({
-            userId : user._id
-        })
-        const replacements = {
-            name: user.username,
-            link: `127.0.0.1:9090/user/activateUser/${token.token}`
-        };
-        await sendPasswordModificationMail(user.email,'forgot you password ? no worries :D',replacements)
-        return res.status(200).json("mail sent");
+
+    try{
+        var user = await User.findOne({ username : req.params.username});
+        if(user){
+            var isExsistingTokenForUser = await PassToken.findOne({userId : user._id});
+            if(isExsistingTokenForUser){
+                await PassToken.findByIdAndDelete(isExsistingTokenForUser._id)
+            }
+            var token = await PassToken.create({
+                userId : user._id
+            })
+            const replacements = {
+                name: user.username,
+                link: `http://localhost:4200/#/auth/newpassword/${token.token}`
+            };
+            await sendPasswordModificationMail(user.email,'forgot you password ? no worries :D',replacements)
+            return res.status(200).json("mail sent");
+        }
+
+        res.status(404).json({message : 'invalid user name please check again'})
+    }
+    catch(err){
+        console.error(err);
+        res.status(500).json({message : 'inetrnal server error'}  
     }
 }
 
+export const checkToken = async (req, res) =>{
+    try{
+        var validatedToken = await PassToken.findOne({token : req.params.token});   
+        const addOneHour = () => moment.tz('Africa/Tunis').add(1, 'hour').toDate();
+        const now = addOneHour();
+        console.log(now);
+        if(validatedToken == null || validatedToken == undefined){
+            return res.status(401).json({message : `no such token` , status : false})
+        }
+        if(validatedToken.validUntill < now){
+            return res.status(401).json({message : `token expired unauthorized` , status : false})
+        }
+
+        return res.status(200).json({message : `valid token`, status : true});
+        }
+        catch(err){
+            console.error(err);
+            res.status(500).json({message : 'inetrnal server error'})
+        }
+}
 export const resetPassWord = async (req, res) =>{
     var validatedToken = await PassToken.findOne({token : req.params.token});
     let now = new Date();
@@ -184,7 +245,83 @@ export const resetPassWord = async (req, res) =>{
     now.setMinutes(now.getMinutes() + timeZoneOffset);
     now.setMinutes(now.getMinutes() + 20); //add 20 mins check for token TTL
     console.log(now);
-    if(isBefore(validatedToken.createdAt, now)){
-        
+    if(validatedToken.validUntill > now){
+        const user = await User.findById(validatedToken.userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        const salt = user.salt;
+        const hashPassword = hashPassWordWithSalt(req.body.password, salt);
+        await User.findByIdAndUpdate(
+            user._id,
+            { password: hashPassword },
+            { new: true }
+        );
+        await PassToken.findByIdAndDelete(validatedToken._id);
+        return res.status(201).json({message : `user ${user.username} resetPassword finished`, status : true});
+
+    }
+
+        return res.status(401).json({message : `token expired unauthorized` , status : false})
+    }
+    catch(err){
+        console.error(err);
+        res.status(500).json({message : 'inetrnal server error'})
     }
 }
+
+export const disactivaetUser = async (req, res) => {
+    try {
+        if(req.user.role != RoleEnum.ADMIN){
+            return res.status(403).json({error : 'Account type not authorized for this action'});
+        }
+        const userId = req.params.id;
+        await User.findByIdAndUpdate(userId, { isActivated : false }, { new: true });
+
+    } catch (err) {
+        return res.status(500).json({message : "something is wrong contact us for more info thank you"});
+    }
+}
+
+export async function updateUser(req, res) {
+    if (!validationResult(req).isEmpty()) {
+        return res.status(400).json({ errors: validationResult(req).array() });
+    }
+
+    try {
+        const existingUser = await User.findById(req.params.userId);
+        if (!existingUser) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const { username, email, phoneNumber } = req.body;
+
+        let hasChanged = false;
+        if (username && username !== existingUser.username) {
+            existingUser.username = username;
+            hasChanged = true;
+        }
+        if (email && email !== existingUser.email) {
+            existingUser.email = email;
+            hasChanged = true;
+        }
+        if (phoneNumber && phoneNumber !== existingUser.phoneNumber) {
+            existingUser.phoneNumber = phoneNumber;
+            hasChanged = true;
+        }
+        if (req.file?.filename != undefined && `${req.protocol}://${req.get('host')}/img/${req.file.filename}` !== existingUser.image) {
+            existingUser.image = `${req.protocol}://${req.get('host')}/img/${req.file.filename}`;
+            hasChanged = true;
+        }
+
+        if (hasChanged) {
+            await existingUser.save();
+            return res.status(200).json({ message: 'User updated successfully' });
+        } else {
+            return res.status(200).json({ message: 'No changes detected' });
+        }
+    } catch (err) {
+        return res.status(500).json(err);
+    }
+}
+
