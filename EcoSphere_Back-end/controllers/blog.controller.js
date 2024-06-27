@@ -73,3 +73,13 @@ export const deleteBlog = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 };
+
+export const searchBlog = async (req, res) => {
+    const { name } = req.query;
+    try {
+        const blogs = await Blog.find({ title: new RegExp(name, 'i') }); // Recherche insensible à la casse
+        res.status(200).json(blogs);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
