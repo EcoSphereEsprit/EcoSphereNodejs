@@ -8,7 +8,7 @@ import userRoutes from './routes/user.route.js'
 import commentRoutes from './routes/comment.route.js'
 import blogRoutes from './routes/blog.route.js'
 import imgRoutes from './routes/img.route.js'
-import { notFoundError, errorHandler, /*authenticateToken*/ } from './middlewares/errorhandler.js'
+import { notFoundError, errorHandler, authenticateToken } from './middlewares/errorhandler.js'
 import * as fs from 'fs';
 import couponRoutes from './routes/coupon.route.js'
 // produit
