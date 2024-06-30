@@ -12,10 +12,15 @@ import couponRoutes from './routes/coupon.route.js'
 // produit
 import productRouter from './routes/produits.route.js'
 import categorieRouter from './routes/categories.route.js'
+
 import commandeRoutes from './routes/commande.route.js';
 import facturationRoutes from './routes/facturation.route.js';
 import paiementRoutes from './routes/paiement.route.js';
 import flashSaleRoutes from './routes/flashSale.route.js';
+import paiementModel from './models/paiement.model.js';
+import FacturationModel from './models/Facturation.model.js';
+import commandeModel from './models/commande.model.js';
+
 
 //Config env vars are fetched from this config file
 const configFile = fs.readFileSync('./config/app.config.json', 'utf8');
@@ -43,6 +48,8 @@ app.use('/blogs', blogRoutes)
 app.use('/comments', commentRoutes)
 app.use('/flashSale', flashSaleRoutes)
 app.use('/user', userRoutes)
+app.use(notFoundError)
+app.use(errorHandler)
 
 app.use('/public/images', express.static('public/images')); // Serve static files
 app.use('/img', express.static('.\public\images'));
@@ -54,8 +61,6 @@ app.use('/img', imgRoutes);
 app.use('/coupon', couponRoutes)
 
 
-app.use(notFoundError)
-app.use(errorHandler)
 
 //db conig call
 InitDbSetup(configObject.database.url);
