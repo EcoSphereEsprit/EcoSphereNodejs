@@ -41,16 +41,17 @@ app.use('/categories', categorieRouter);
 app.use('/img', imgRoutes)
 app.use('/blogs', blogRoutes)
 app.use('/comments', commentRoutes)
-app.use('/coupon', couponRoutes)
 app.use('/flashSale', flashSaleRoutes)
 app.use('/user', userRoutes)
 
+app.use('/public/images', express.static('public/images')); // Serve static files
 app.use('/img', express.static('.\public\images'));
 app.use('/commandes', commandeRoutes);
 app.use('/facturation', facturationRoutes);
 app.use('/paiement', paiementRoutes);
 app.use('/user', userRoutes);
 app.use('/img', imgRoutes);
+app.use('/coupon', couponRoutes)
 
 
 app.use(notFoundError)

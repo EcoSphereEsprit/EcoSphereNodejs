@@ -4,13 +4,15 @@ import { postCoupon, findAll, getOneByCode, updateOneByCode, deleteOneByCode } f
 const router = express.Router();
 
 //* Create a new Coupon
-router.route('/post').post([
-    body('code').isLength({ min: 5, max: 50 }),
-    body('code').isString,
-    body('reduction').isNumeric,
-    body('dateCreation').isDate,
-    body('dateExipration').isDate,
-    body('status').isString],
+router.route('/post').post(
+    [
+        body('code').isLength({ min: 5, max: 50 }),
+        body('code').isString(),
+        body('reduction').isNumeric(),
+        body('dateCreation').isDate(),
+        body('dateExpiration').isDate(),
+        body('status').isString()
+    ],
     postCoupon)
 
 //* Read all coupons
@@ -23,7 +25,7 @@ router.route('/findOneByCode/:code').get(getOneByCode);
 router.route('/updateOneByCode/:code').put(updateOneByCode);
 
 //* Delete a coupon
-router.route('/deleteByCode/:code').delete(deleteOneByCode);
+router.route('/deleteByCode/:id').delete(deleteOneByCode);
 
 export default router;
 

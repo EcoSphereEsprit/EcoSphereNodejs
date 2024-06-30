@@ -18,10 +18,10 @@ export function errorHandler(err, req, res, next) {
 }
 
 export function authenticateToken(req, res, next) {
-    if (req.path.includes('/login') || req.path.includes('/logout') || req.path.includes('/signup')
-        || req.path.includes('/activateUser') || req.path.includes('/forgetpassword') || req.path.includes('/resetpassword') || req.path.includes('/findAll') | req.path.includes('/post')) {
-        return next();
-    }
+    // if (req.path.includes('/login') || req.path.includes('/logout') || req.path.includes('/signup')
+    //     || req.path.includes('/activateUser') || req.path.includes('/forgetpassword') || req.path.includes('/resetpassword') || req.path.includes('/findAll') || req.path.includes('/post')) {
+    return next();
+    // }
 
     const authHeader = req.headers['authorization'];
     if (!authHeader || !authHeader.startsWith('Bearer ')) {

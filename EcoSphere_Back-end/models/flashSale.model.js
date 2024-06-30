@@ -23,9 +23,8 @@ const flashSaleSchema = new Schema({
         type: Date,
         required: true
     },
-    imageUrl: {
-        type: String,
-        required: true
+    image: {
+        type: String
     }
 });
 

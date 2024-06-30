@@ -1,17 +1,19 @@
 import express from 'express';
 import { body } from 'express-validator';
 import { postFlashSale, findAll, getOneById, updateOneById, deleteOneById } from '../controllers/flashSale.controller.js';
-import multer from '../middlewares/multer-config.js';
+import multerUpload from '../middlewares/multer-config.js';
 const router = express.Router();
 
 //* Create a new flash sale with an image
-router.route('/post').post(multer,
-    body('product').isString,
-    body('price').isNumeric,
-    body('discountPrice').isNumeric,
-    body('startDate').isDate,
-    body('endDate').isDate,
-    body('imageUrl').isString,
+router.route('/post').post(multerUpload,
+    [
+        body('product').isString(),
+        body('price').isNumeric(),
+        body('discountPrice').isNumeric(),
+        body('startDate').isDate(),
+        body('endDate').isDate(),
+        body('imageUrl').isString()
+    ],
     postFlashSale)
 
 //* Read all flash sales

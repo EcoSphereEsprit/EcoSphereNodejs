@@ -13,8 +13,12 @@ export function postCoupon(req, res) {
         Coupon.create({
             code: req.body.code,
             reduction: req.body.reduction,
+            dateCreation: req.body.dateCreation,
             dateExpiration: req.body.dateExpiration,
+            status: req.body.status,
+
         }).then(newCoupon => {
+            console.log(newCoupon);
             res.status(201).json(newCoupon)
         }).catch(err => {
             res.status(500).json(err)
@@ -44,19 +48,24 @@ export function getOneByCode(req, res) {
 
 export const updateOneByCode = async (req, res) => {
     try {
-        const coupon = await Coupon.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+        // const coupon = await Coupon.findByIdAndUpdate({ code: req.params.code }, req.body, { new: true, runValidators: true });
+        const coupon = await Coupon.findOne({ code: req.params.code });
+
         if (!coupon) {
             return res.status(404).json({ message: 'Coupon non trouvée' });
         }
-        res.status(200).send(coupon);
+        // res.status(200).send(coupon);
+        Object.assign(coupon, req.body);
+        // await ajouterHistoriqueStatut(coupon, req.body);
+        res.status(200).json(await coupon.save());
     } catch (error) {
-        res.status(400).send(error);
+        res.status(400).json(error);
     }
 }
 
 export const deleteOneByCode = async (req, res) => {
     try {
-        const coupon = await Coupon.findByIdAndDelete(req.params.id);
+        const coupon = await Coupon.findByIdAndDelete({ _id: req.params.id });
         if (!coupon) {
             return res.status(404).json({ message: 'Coupon non trouvée' });
         }
