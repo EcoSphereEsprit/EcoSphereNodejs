@@ -6,7 +6,8 @@ import {
     getAllComments,
     getCommentById,
     updateComment,
-    deleteComment
+    deleteComment,
+    getCommentsByBlogId
 
 
 } from '../controllers/comment.controller.js';
@@ -17,4 +18,5 @@ router.get('/getAll', getAllComments);
 router.get('/getComment/:id', getCommentById);
 router.put('/:id', updateComment);
 router.delete('/:id', deleteComment);
+router.get('/getByBlog/:blogId', getCommentsByBlogId);
 export default router;

@@ -5,17 +5,32 @@ import Comment from '../models/comment.model.js';
 
 export const createComment = async (req, res) => {
     try {
-        const { content, date } = req.body;
+        const { content, date, user } = req.body;
         const { blogId } = req.params; // Identifiant du blog auquel le commentaire est associé
+
+        // Liste des mots interdits
+        const badWords = ['pute', 'mauvais2', 'mauvais3']; // Ajoutez les mots interdits ici
+
+        // Fonction pour remplacer les mots interdits par des étoiles
+        const filterBadWords = (text) => {
+            badWords.forEach(word => {
+                const regex = new RegExp(`\\b${word}\\b`, 'gi');
+                text = text.replace(regex, '*'.repeat(word.length));
+            });
+            return text;
+        };
+
+        // Filtrer le contenu du commentaire
+        const filteredContent = filterBadWords(content);
 
         // Récupérer le blog auquel ajouter le commentaire
         const blog = await Blog.findById(blogId);
         if (!blog) {
             return res.status(404).json({ error: 'Blog not found' });
         }
-        const userId = req.user.Id;
+
         // Créer le commentaire
-        const comment = new Comment({ content, date, blog: blogId, user: userId });
+        const comment = new Comment({ content: filteredContent, date, blog: blogId, user });
         await comment.save();
 
         // Ajouter le commentaire à la liste des commentaires du blog
@@ -52,9 +67,31 @@ export const getCommentById = async (req, res) => {
 
 export const updateComment = async (req, res) => {
     try {
-        const comment = await Comment.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const { content, date } = req.body;
+
+        // Liste des mots interdits
+        const badWords = ['pute', 'mauvaisMot2', 'mauvaisMot3']; // Ajoutez les mots interdits ici
+
+        // Fonction pour remplacer les mots interdits par des étoiles
+        const filterBadWords = (text) => {
+            badWords.forEach(word => {
+                const regex = new RegExp(`\\b${word}\\b`, 'gi');
+                text = text.replace(regex, '*'.repeat(word.length));
+            });
+            return text;
+        };
+
+        // Filtrer le contenu du commentaire
+        const filteredContent = filterBadWords(content);
+
+        const comment = await Comment.findByIdAndUpdate(
+            req.params.id, 
+            { content: filteredContent, date }, 
+            { new: true }
+        );
+
         if (comment) {
-            res.status(200).json({message:'Comment updated successfully'});
+            res.status(200).json({ message: 'Comment updated successfully' });
         } else {
             res.status(404).json({ error: 'Comment not found' });
         }
@@ -62,6 +99,7 @@ export const updateComment = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 };
+
 
 export const deleteComment = async (req, res) => {
     try {
@@ -83,5 +121,23 @@ export const deleteComment = async (req, res) => {
     }
 };
 
+export const getCommentsByBlogId = async (req, res) => {
+    try {
+        const { blogId } = req.params;
+        
+        // Find the blog by its ID
+        const blog = await Blog.findById(blogId);
+        if (!blog) {
+            return res.status(404).json({ error: 'Blog not found' });
+        }
+        
+        // Find comments associated with the blog
+        const comments = await Comment.find({ blog: blogId });
+        
+        res.status(200).json(comments);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
 
  

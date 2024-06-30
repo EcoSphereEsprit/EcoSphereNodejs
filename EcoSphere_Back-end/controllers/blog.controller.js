@@ -1,22 +1,20 @@
-
 import Blog from '../models/blog.model.js';
+import path, { dirname } from 'path';
+import { fileURLToPath } from 'url';
 
 export const createBlog = async (req, res) => {
     try {
-        const { title, description, date } = req.body;
-        const userID=req.user.Id;
-        const image = req?.file?.path; // Chemin d'accès temporaire de l'image téléchargée
+        const { title, description, date,user } = req.body;
+        //const userID = req.user.Id; // Assuming you have user ID in req.user from authentication middleware
 
-        // Utilisez userID comme vous le souhaitez, par exemple, pour associer le blog à l'utilisateur
-        console.log(userID);
+    const image = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
 
-        const blog = new Blog({ title, description, date, image, user: userID });
+        const blog = new Blog({ title, description, date, image, user/*: userID*/ });
         await blog.save();
 
         res.status(201).json(blog);
     } catch (error) {
         res.status(400).json({ error: error.message });
-  
     }
 };
 
@@ -73,5 +71,15 @@ export const deleteBlog = async (req, res) => {
         }
     } catch (error) {
         res.status(400).json({ error: error.message });
+    }
+};
+
+export const searchBlog = async (req, res) => {
+    const { name } = req.query;
+    try {
+        const blogs = await Blog.find({ title: new RegExp(name, 'i') }); // Recherche insensible à la casse
+        res.status(200).json(blogs);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
 };

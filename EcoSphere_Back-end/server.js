@@ -1,4 +1,6 @@
 import express from 'express'
+import path from 'path'
+import { fileURLToPath } from 'url'
 import morgan from 'morgan'
 import cors from 'cors'
 import { InitDbSetup } from './config/DataBaseSetUp.js'
@@ -32,7 +34,7 @@ app.use(express.json())
 //Only use in dev envirement
 app.use(morgan('dev'))
 
-app.use(authenticateToken);
+//app.use(authenticateToken);
 app.use('/user', userRoutes)
 
 //merge
@@ -50,9 +52,13 @@ app.use('/flashSale', flashSaleRoutes)
 app.use('/user', userRoutes)
 app.use(notFoundError)
 app.use(errorHandler)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
 app.use('/public/images', express.static('public/images')); // Serve static files
 app.use('/img', express.static('.\public\images'));
+// app.use('/img', express.static('./public/images'));
 app.use('/commandes', commandeRoutes);
 app.use('/facturation', facturationRoutes);
 app.use('/paiement', paiementRoutes);

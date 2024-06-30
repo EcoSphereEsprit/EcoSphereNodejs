@@ -7,12 +7,17 @@ import {
     checkToken, Get2FACode, verify2FACode, updateUser
 } from '../controllers/user.controller.js';
 
+// import { SignUp, findAll, getOneById, getOneByUserName, login, logout, activateUser, forgotPassWord, resetPassWord } from '../controllers/user.controller.js';
 import multer from '../middlewares/multer-config.js';
 const router = express.Router();
 
 router
     .route('/signup')
-    .post(multer, SignUp)
+    .post(multer,
+        body('username').isLength({ min: 5, max: 50 }),
+        body('password').isLength({ min: 6, max: 16 }),
+        body('phoneNumber').isLength({ min: 8, max: 8 }),
+        SignUp)
 
 router
     .route('/')
@@ -27,7 +32,7 @@ router
 
 router
     .route('/login')
-    .post(login);
+    .get(login);
 
 
 router
@@ -44,7 +49,7 @@ router
     .route('/forgetpassword/:username')
     .post(forgotPassWord);
 router
-    .route('/resetpassword/:token')
+    .route('/resetpassword/:id/:token')
     .post(resetPassWord);
 
 router.route('/').get(findAll);
@@ -56,5 +61,6 @@ router.route('/createadmin').post(CreateAdmin);
 router.route('/disactivaetUser/:id').post(disactivaetUser);
 router.route('/updateuser/:userId').patch(multer, updateUser)
 
+router.route('/:username').get(getOneByUserName);
 
 export default router;
