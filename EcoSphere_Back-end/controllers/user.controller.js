@@ -118,7 +118,7 @@ export function login(req, res) {
           return res.status(401).json({ message: 'Incorrect username or password' });
         }
         if(LoggedInUsers.has(user.username)){
-            return res.status(200).json({message : 'User already logged in' , token : LoggedInUsers.get(user.username), role : user.role, userId : user._id})
+            return res.status(200).json({message : 'User already logged in' , token : LoggedInUsers.get(user.username), role : user.role, userId : user._id, username : user.username})
         }
 
         const claims = {
@@ -129,7 +129,7 @@ export function login(req, res) {
         let token = GetValidJwt(claims);
         LoggedInUsers.set(user.username, token);
   
-        res.status(200).json({ message: 'Login successful', token: token, role : user.role, userId : user._id, avatrUrl : user.image});
+        res.status(200).json({ message: 'Login successful', token: token, role : user.role, userId : user._id, avatrUrl : user.image, username : user.username});
       })
       .catch(err => {
         res.status(500).json({ message: 'Internal server error', error: err });
