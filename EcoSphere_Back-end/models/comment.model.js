@@ -18,7 +18,14 @@ const commentSchema = new Schema({
         ref: 'Blog',
         required: true,
       },
-      user: { type: Schema.Types.ObjectId, ref: 'User' }
+      user: { 
+        type: String,
+        required : true
+      },
+      userId: {
+        type: String,
+        required : true
+      }
 });
 
 export default model('Comment', commentSchema);

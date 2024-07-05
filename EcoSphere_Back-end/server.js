@@ -33,7 +33,7 @@ app.use(express.json())
 //Only use in dev envirement
 app.use(morgan('dev'))
 
-//app.use(authenticateToken);
+app.use(authenticateToken);
 app.use('/user', userRoutes)
 
 //merge
