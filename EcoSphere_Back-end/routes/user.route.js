@@ -3,10 +3,10 @@ import { body } from 'express-validator';
 
 import {
     SignUp, findAll, getOneById, getOneByUserName, login, logout,
-    activateUser, forgotPassWord, resetPassWord, CreateAdmin, disactivaetUser,
+    activateUser, forgotPassWord, resetPassWord, disactivaetUser,
     checkToken, Get2FACode, verify2FACode, updateUser
 } from '../controllers/user.controller.js';
-
+// CreateAdmin
 // import { SignUp, findAll, getOneById, getOneByUserName, login, logout, activateUser, forgotPassWord, resetPassWord } from '../controllers/user.controller.js';
 import multer from '../middlewares/multer-config.js';
 const router = express.Router();
@@ -57,7 +57,7 @@ router.route('/chechToken/:token').get(checkToken);
 router.route('/get2FaId/:id').get(Get2FACode);
 router.route('/verify2FACode/:id/:code').get(verify2FACode);
 router.route('/:username').get(getOneByUserName);
-router.route('/createadmin').post(CreateAdmin);
+// router.route('/createadmin').post(CreateAdmin);
 router.route('/disactivaetUser/:id').post(disactivaetUser);
 router.route('/updateuser/:userId').patch(multer, updateUser)
 
