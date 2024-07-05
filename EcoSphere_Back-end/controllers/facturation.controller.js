@@ -3,7 +3,7 @@ import Facturation from '../models/Facturation.model.js';
 import Commande from '../models/commande.model.js';
 import Stripe from 'stripe';
 
-const stripe = new Stripe('votre_cle_secrete_stripe');
+const stripe = new Stripe('sk_test_51PMo9d02MJa5rkEb3YFBNKFcrS73Kylf2c3ZEidIO6ZPFUlMCijlEbSTmz6vO94DG1AZwj18aXwZo9b7cu1uDgBV00TCbrrLmj');
 
 // Créer une nouvelle facturation et un paiement via Stripe
 
@@ -29,7 +29,7 @@ export const creerFacturation = async (req, res) => {
                 payment_method_types: ['card'],
                 payment_method: 'pm_card_visa', 
                 confirm: true,
-                return_url: 'https://localhost:3000/confirmation' 
+                return_url: 'https://localhost:4000/confirmation' 
             });
         }
 
