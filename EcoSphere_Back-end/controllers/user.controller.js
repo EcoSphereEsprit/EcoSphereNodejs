@@ -118,7 +118,7 @@ export function login(req, res) {
           return res.status(401).json({ message: 'Incorrect username or password' });
         }
         if(LoggedInUsers.has(user.username)){
-            return res.status(200).json({message : 'User already logged in' , token : LoggedInUsers.get(user.username), role : user.role, userId : user._id, username : user.username})
+            return res.status(200).json({message : 'User already logged in' , token : LoggedInUsers.get(user.username), role : user.role, userId : user._id, avatrUrl : user.image,  username : user.username})
         }
 
         const claims = {
@@ -317,8 +317,8 @@ export async function updateUser(req, res) {
         }
 
         if (hasChanged) {
-            await existingUser.save();
-            return res.status(200).json({ message: 'User updated successfully' });
+            var updatedUser = await existingUser.save();
+            return res.status(200).json({ message: 'User updated successfully', image : updatedUser.image });
         } else {
             return res.status(200).json({ message: 'No changes detected' });
         }
