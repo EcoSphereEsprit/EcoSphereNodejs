@@ -37,6 +37,7 @@ app.use(morgan('dev'))
 //app.use(authenticateToken);
 app.use('/user', userRoutes)
 
+app.use('/coupon', couponRoutes)
 //merge
 //produit routes
 app.use('/produit', productRouter);
@@ -57,6 +58,7 @@ const __dirname = path.dirname(__filename);
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
 app.use('/public/images', express.static('public/images')); // Serve static files
+
 app.use('/img', express.static('.\public\images'));
 // app.use('/img', express.static('./public/images'));
 app.use('/commandes', commandeRoutes);
@@ -64,7 +66,6 @@ app.use('/facturation', facturationRoutes);
 app.use('/paiement', paiementRoutes);
 app.use('/user', userRoutes);
 app.use('/img', imgRoutes);
-app.use('/coupon', couponRoutes)
 
 
 

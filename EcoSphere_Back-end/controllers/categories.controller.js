@@ -1,5 +1,5 @@
 import { validationResult } from 'express-validator';
-import Categorie from '../models/categories.model.js'; 
+import Categorie from '../models/categories.model.js';
 
 export const addCategorie = (req, res) => {
     const errors = validationResult(req);
@@ -56,5 +56,15 @@ export const updateCategorie = async (req, res) => {
         res.status(500).json({ message: 'Erreur lors de la mise à jour de la catégorie', erreur: error.message });
     }
 };
+
+export function getCategorieById(req, res) {
+    User.findOne({ _id: req.params.id })
+        .then(category => {
+            res.status(200).json(category)
+        })
+        .catch(err => {
+            res.status(500).json(err)
+        })
+}
 
 

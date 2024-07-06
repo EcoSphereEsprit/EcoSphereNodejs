@@ -1,6 +1,6 @@
 import express from 'express';
 import { body } from 'express-validator';
-import { postCoupon, findAll, getOneByCode, updateOneByCode, deleteOneByCode } from '../controllers/coupon.controller.js';
+import { postCoupon, findAll, getOneByCode, updateOneByCode, deleteOneByCode, affectCouponToUser } from '../controllers/coupon.controller.js';
 const router = express.Router();
 
 //* Create a new Coupon
@@ -26,6 +26,8 @@ router.route('/updateOneByCode/:code').put(updateOneByCode);
 
 //* Delete a coupon
 router.route('/deleteByCode/:id').delete(deleteOneByCode);
+
+router.route('/sendCouponMail').post(affectCouponToUser);
 
 export default router;
 

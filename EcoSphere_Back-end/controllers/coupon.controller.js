@@ -1,5 +1,6 @@
 import Coupon from '../models/coupon.model.js'
 import { validationResult } from 'express-validator'
+import { sendCouponMail } from '../services/mailService.js'
 
 
 
@@ -75,9 +76,14 @@ export const deleteOneByCode = async (req, res) => {
     }
 }
 
-export function affectCouponToUser(req, res) {
-
+export const affectCouponToUser = async (req, res) => {
+    const replacements = {
+        coupon: req.body.coupon
+    };
+    await sendCouponMail(req.body.mailUser, 'You have earned a Coupon !', replacements)
+    res.status(200).json(200);
 }
+
 
 export function affectCouponToProduct(req, res) {
 
