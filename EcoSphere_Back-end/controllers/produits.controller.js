@@ -81,7 +81,7 @@ export const updateProduit = async (req, res) => {
 
 
         if (req.file) {
-            produit.image = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
+            produit.image = `${req.protocol}://${req.get('host')}/img/${req.file.filename}`;
         }
 
         
