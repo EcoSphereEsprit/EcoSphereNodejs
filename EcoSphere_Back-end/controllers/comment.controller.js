@@ -9,7 +9,7 @@ export const createComment = async (req, res) => {
         const { blogId } = req.params; // Identifiant du blog auquel le commentaire est associé
 
         // Liste des mots interdits
-        const badWords = ['pute', 'mauvais2', 'mauvais3']; // Ajoutez les mots interdits ici
+        const badWords = ['mauvaismot', 'mauvais', 'badword']; // Ajoutez les mots interdits ici
 
         // Fonction pour remplacer les mots interdits par des étoiles
         const filterBadWords = (text) => {
@@ -71,7 +71,7 @@ export const updateComment = async (req, res) => {
         const { content, date } = req.body;
 
         // Liste des mots interdits
-        const badWords = ['pute', 'mauvaisMot2', 'mauvaisMot3']; // Ajoutez les mots interdits ici
+        const badWords = ['mauvaismot', 'mauvais', 'badword']; // Ajoutez les mots interdits ici
 
         // Fonction pour remplacer les mots interdits par des étoiles
         const filterBadWords = (text) => {
