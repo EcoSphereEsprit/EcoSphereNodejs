@@ -80,10 +80,6 @@ export const sendPasswordModificationMail = async (to, subject, replacements) =>
     }
 };
 
-export const sendBackValidationTemplate = async () => {
-    const x = await readHTMLFile(path.join(templatesFolderPath, 'validation.html'));
-    return x;
-}
 
 export const send2faCode = async (to, subject, replacements) => {
     try {
@@ -108,6 +104,13 @@ export const send2faCode = async (to, subject, replacements) => {
         console.error('Error:', error);
     }
 };
+export const sendBackValidationTemplate = async() => {
+
+    const x = await readHTMLFile(path.join(templatesFolderPath, 'validation.html'));
+    return x;
+}
+
+
 
 export const sendCouponMail = async (to, subject, replacements) => {
     try {
@@ -131,3 +134,4 @@ export const sendCouponMail = async (to, subject, replacements) => {
         console.error('Error:', error);
     }
 };
+

@@ -7,10 +7,12 @@ export const createBlog = async (req, res) => {
         const { title, description, date,user } = req.body;
         //const userID = req.user.Id; // Assuming you have user ID in req.user from authentication middleware
 
-    const image = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
+
+    const image = `${req.protocol}://${req.get('host')}/img/${req.file.filename}`;
 
         const blog = new Blog({ title, description, date, image, user/*: userID*/ });
         await blog.save();
+    
 
         res.status(201).json(blog);
     } catch (error) {
@@ -46,7 +48,7 @@ export const updateBlog = async (req, res) => {
         let image = req.body.image;
         if (req.file) {
             // Si une nouvelle image est téléchargée, utilisez son chemin d'accès temporaire
-            image = req.file.path;
+             image = `${req.protocol}://${req.get('host')}/img/${req.file.filename}`;
         }
         const blog = await Blog.findByIdAndUpdate(req.params.id, { title, description, date, image }, { new: true });
         if (blog) {

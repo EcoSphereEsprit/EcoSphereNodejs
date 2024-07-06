@@ -18,7 +18,9 @@ import categorieRouter from './routes/categories.route.js'
 import commandeRoutes from './routes/commande.route.js';
 import facturationRoutes from './routes/facturation.route.js';
 import paiementRoutes from './routes/paiement.route.js';
+
 import flashSaleRoutes from './routes/flashSale.route.js';
+
 import paiementModel from './models/paiement.model.js';
 import FacturationModel from './models/Facturation.model.js';
 import commandeModel from './models/commande.model.js';
@@ -45,6 +47,8 @@ app.use('/produit', productRouter);
 //categories routes
 app.use('/categories', categorieRouter);
 
+app.use('/commandes', commandeRoutes);
+app.use('/facturation', facturationRoutes);
 
 app.use('/img', imgRoutes)
 app.use('/blogs', blogRoutes)
@@ -57,12 +61,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
-app.use('/public/images', express.static('public/images')); // Serve static files
 
-app.use('/img', express.static('.\public\images'));
-// app.use('/img', express.static('./public/images'));
-app.use('/commandes', commandeRoutes);
-app.use('/facturation', facturationRoutes);
+app.use('/img', express.static('./public/images'));
+
 app.use('/paiement', paiementRoutes);
 app.use('/user', userRoutes);
 app.use('/img', imgRoutes);

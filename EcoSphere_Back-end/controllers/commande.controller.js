@@ -8,11 +8,13 @@ import { creerFacturation } from './facturation.controller.js';
 
 
 export const ajouterCommande = async (req, res) => {
+
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
+
 
     const { numCommande, produits, infosLivraison, prixTotal, modePaiement, coupon, pourcentageRéduction } = req.body;
 
@@ -58,6 +60,7 @@ export const obtenirCommandes = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 // Obtenir toutes les commandes avec recherche et filtrage
 export const obtenirCommandesFiltre = async (req, res) => {
@@ -130,20 +133,29 @@ export const obtenirCommandeParId = async (req, res) => {
 
 // Mettre à jour une commande
 export const mettreAJourCommande = async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
 
-    const commande = await Commande.findById(req.params.id);
-    if (!commande) {
-      return res.status(404).json({ message: "Commande non trouvée" });
-    }
+    try {
 
-    // Check if the user has permission to update the command
-    if (req.user.role !== 'ADMIN' && commande.userId.toString() !== req.user._id) {
-      return res.status(403).json({ message: "Vous n'avez pas la permission de mettre à jour cette commande" });
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+  
+      const commande = await Commande.findById(req.params.id);
+      if (!commande) {
+        return res.status(404).json({ message: "Commande non trouvée" });
+      }
+  
+      // Check if the user has permission to update the command
+      if (req.user.role !== 'ADMIN' && commande.userId.toString() !== req.user._id) {
+        return res.status(403).json({ message: "Vous n'avez pas la permission de mettre à jour cette commande" });
+      }
+  
+      Object.assign(commande, req.body);
+      await ajouterHistoriqueStatut(commande, req.body);
+      res.status(200).json(await commande.save());
+    } catch (error) {
+      res.status(500).json({ message: error.message });
     }
 
     Object.assign(commande, req.body);
@@ -163,16 +175,9 @@ export const supprimerCommande = async (req, res) => {
       return res.status(404).json({ message: "Commande non trouvée" });
     }
 
-    // Check if the user has permission to delete the command
-    if (req.user.role !== 'ADMIN' && commande.userId.toString() !== req.user._id) {
-      return res.status(403).json({ message: "Vous n'avez pas la permission de supprimer cette commande" });
-    }
 
-    res.status(200).json({ message: "Commande supprimée avec succès" });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+  };
+  
 
 
 // Annuler une commande

@@ -9,7 +9,9 @@ export const createComment = async (req, res) => {
         const { blogId } = req.params; // Identifiant du blog auquel le commentaire est associé
 
         // Liste des mots interdits
-        const badWords = ['pute', 'mauvais2', 'mauvais3']; // Ajoutez les mots interdits ici
+
+        const badWords = ['mauvaismot', 'mauvais', 'badword']; // Ajoutez les mots interdits ici
+
 
         // Fonction pour remplacer les mots interdits par des étoiles
         const filterBadWords = (text) => {
@@ -29,8 +31,11 @@ export const createComment = async (req, res) => {
             return res.status(404).json({ error: 'Blog not found' });
         }
 
+        const userName = req.user.username
+        const userId = req.user.Id
         // Créer le commentaire
-        const comment = new Comment({ content: filteredContent, date, blog: blogId, user });
+        const comment = new Comment({ content: filteredContent, date, blog: blogId, user : userName, userId : userId});
+
         await comment.save();
 
         // Ajouter le commentaire à la liste des commentaires du blog
@@ -70,7 +75,9 @@ export const updateComment = async (req, res) => {
         const { content, date } = req.body;
 
         // Liste des mots interdits
-        const badWords = ['pute', 'mauvaisMot2', 'mauvaisMot3']; // Ajoutez les mots interdits ici
+
+        const badWords = ['mauvaismot', 'mauvais', 'badword']; // Ajoutez les mots interdits ici
+
 
         // Fonction pour remplacer les mots interdits par des étoiles
         const filterBadWords = (text) => {
@@ -84,9 +91,11 @@ export const updateComment = async (req, res) => {
         // Filtrer le contenu du commentaire
         const filteredContent = filterBadWords(content);
 
+        let now = new Date();
         const comment = await Comment.findByIdAndUpdate(
             req.params.id, 
-            { content: filteredContent, date }, 
+            { content: filteredContent, now }, 
+
             { new: true }
         );
 

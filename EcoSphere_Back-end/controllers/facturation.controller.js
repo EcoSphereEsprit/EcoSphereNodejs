@@ -18,7 +18,10 @@ export const creerFacturation = async (req, res) => {
             return res.status(404).json({ message: "Commande non trouvée" });
         }
 
-        const montantFinal = (montantTotal - reductions + taxes) * 100;
+
+
+        const montantFinal = (montantTotal - reductions + taxes) * 100; 
+
 
         let paymentIntent;
         if (methodePaiement === 'carte_de_crédit') {
@@ -28,7 +31,8 @@ export const creerFacturation = async (req, res) => {
                 payment_method_types: ['card'],
                 payment_method: 'pm_card_visa',
                 confirm: true,
-                return_url: 'https://localhost:3000/confirmation'
+
+                return_url: 'https://localhost:4000/confirmation' 
             });
         }
 
@@ -38,11 +42,13 @@ export const creerFacturation = async (req, res) => {
             reductions,
             taxes,
             methodePaiement,
+
             statutPaiement: methodePaiement === 'carte_de_crédit' ? 'payé' : 'en_attente',
             transactionId: paymentIntent ? paymentIntent.id : null // PaymentIntent ID ou null pour autres méthodes de paiement
         });
 
         const facturationEnregistree = await nouvelleFacturation.save();
+
 
         commande.statutPaiement = methodePaiement === 'carte_de_crédit' ? 'payée' : 'en_attente';
         await commande.save();
@@ -60,6 +66,7 @@ export const creerFacturation = async (req, res) => {
         }
     }
 };
+
 
 export const obtenirFacturations = async (req, res) => {
     try {

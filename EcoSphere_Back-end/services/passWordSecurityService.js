@@ -11,8 +11,8 @@ export function hashPassWordWithSalt(passWord, salt) {
     const hash = pbkdf2Sync(passWord, salt, iterations, keyLength, digest).toString('hex');
     return hash;
 
-}
 
-export function generateRandomNumberString() {
+ }
+ export function generateRandomNumberString() {
     return Math.floor(Math.random() * 10000).toString().padStart(4, '0');
 }
