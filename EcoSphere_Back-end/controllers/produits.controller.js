@@ -1,5 +1,5 @@
 import Produits from '../models/produits.model.js';
-import Categorie from '../models/categories.model.js'; 
+import Categorie from '../models/categories.model.js';
 import upload from '../middlewares/multer-config.js';
 import { validationResult } from 'express-validator'
 
@@ -19,6 +19,7 @@ export function addProduit(req, res) {
         couleur: couleur,
         available: available,
     };
+
     Produits.create(produitData)
         .then(async newProduit => {
             // Incrémenter le nombre de produits dans la catégorie associée
@@ -30,7 +31,7 @@ export function addProduit(req, res) {
             console.error(`Error Creating Product:`, err);
             res.status(500).json(err);
         });
-        
+
 }
 
 export function getProduits(req, res) {
@@ -51,7 +52,7 @@ export const deleteProduit = async (req, res) => {
         if (!produit) {
             return res.status(404).json({ message: 'Produit non trouvé' });
         }
-        
+
         await Categorie.findByIdAndUpdate(produit.categorie, { $inc: { Nbr_produits: -1 } });
 
         res.json({ message: 'Produit supprimé avec succès' });
@@ -84,15 +85,15 @@ export const updateProduit = async (req, res) => {
             produit.image = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
         }
 
-        
+
         await produit.save();
 
 
         // Vérifier si la catégorie updated
         if (newCategorie !== oldCategorie) {
-            
+
             await Categorie.findByIdAndUpdate(oldCategorie, { $inc: { Nbr_produits: -1 } });
-            
+
             await Categorie.findByIdAndUpdate(newCategorie, { $inc: { Nbr_produits: 1 } });
         }
 
@@ -179,12 +180,12 @@ export const getProduitsSortedByDate = async (req, res) => {
         const { order } = req.query;
         let sortOrder = 1; // tri asce
 
-        
+
         if (order && order.toLowerCase() === 'desc') {
             sortOrder = -1; // Tri desc
         }
 
-        
+
         const produits = await Produits.find().sort({ createdAt: sortOrder });
 
         res.json(produits);
@@ -198,14 +199,14 @@ export const checkStockAvailability = async (req, res) => {
     try {
         const { productId } = req.params;
 
-       
+
         const produit = await Produits.findById(productId);
 
         if (!produit) {
             return res.status(404).json({ message: 'Produit non trouvé' });
         }
 
-        
+
         const isAvailable = produit.quantite_stock > 0;
 
         res.json({ isAvailable });

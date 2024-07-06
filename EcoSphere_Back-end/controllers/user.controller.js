@@ -12,27 +12,27 @@ import {sendActivationMail, sendBackValidationTemplate, sendPasswordModification
 export var BlackList = new Set();
 export var LoggedInUsers = new Map();
 
-export function addone(req,res){
-    if(!validationResult(req).isEmpty()){
-        res.status(400).json({errors : validationResult(req).array()})
+export function addone(req, res) {
+    if (!validationResult(req).isEmpty()) {
+        res.status(400).json({ errors: validationResult(req).array() })
     }
-    else{
+    else {
         console.log(req.file)
         User.create({
-            username : req.body.username,
-            email : req.body.email,
-            password : req.body.password,
-            phoneNumber : req.body.phoneNumber,
-            image : `${req.protocol}://${req.get('host')}/img/${req.file.filename}`
+            username: req.body.username,
+            email: req.body.email,
+            password: req.body.password,
+            phoneNumber: req.body.phoneNumber,
+            image: `${req.protocol}://${req.get('host')}/img/${req.file.filename}`
         }
 
         )
-        .then(newUser => {
-            res.status(201).json(newUser)
-        })
-        .catch(err => {
-            res.status(500).json(err)
-        })
+            .then(newUser => {
+                res.status(201).json(newUser)
+            })
+            .catch(err => {
+                res.status(500).json(err)
+            })
     }
 }
 
@@ -63,13 +63,14 @@ export async function SignUp(req, res) {
             link: `127.0.0.1:9090/user/activateUser/${newUser._id}`
         };
 
-        await sendActivationMail(newUser.email, `Hi ${newUser.username} activate your ecoSphere account and enjoy the journy!`,replacements);
+        await sendActivationMail(newUser.email, `Hi ${newUser.username} activate your ecoSphere account and enjoy the journy!`, replacements);
 
         return res.status(201).json(newUser);
     } catch (err) {
         return res.status(500).json(err);
     }
 }
+
 
 export function findAll(req,res){
    User.find({} ,'_id username phoneNumber isActivated email role')
@@ -81,28 +82,29 @@ export function findAll(req,res){
    })
 }
 
-export function getOneByUserName (req, res){
-    User.findOne({username : req.params.username})
-    .then(user => {
-        res.status(200).json(user)
-    })
-    .catch(err => {
-        res.status(500).json(err)
-    })
+export function getOneByUserName(req, res) {
+    User.findOne({ username: req.params.username })
+        .then(user => {
+            res.status(200).json(user)
+        })
+        .catch(err => {
+            res.status(500).json(err)
+        })
 }
 
-export function getOneById (req, res){
-    User.findOne({_id : req.params.id})
-    .then(user => {
-        res.status(200).json(user)
-    })
-    .catch(err => {
-        res.status(500).json(err)
-    })
+export function getOneById(req, res) {
+    User.findOne({ _id: req.params.id })
+        .then(user => {
+            res.status(200).json(user)
+        })
+        .catch(err => {
+            res.status(500).json(err)
+        })
 }
 
 export function login(req, res) {
     const { username, password } = req.body;
+
 
     User.findOne({ username : username })
       .then(user => {
@@ -151,29 +153,33 @@ export function logout(req, res){
     res.status(200).json({ message: 'logout successful', token: token });
 }
 
- export const activateUser = async (req, res) => {
+export const activateUser = async (req, res) => {
     try {
       const userId = req.params.id;
       const updatedUser = await User.findByIdAndUpdate(userId, { isActivated : true }, { new: true });
       res.setHeader('Content-Type', 'text/html');
       return res.send(await sendBackValidationTemplate());
     } catch (err) {
-        return res.status(500).json({message : "something is wrong contact us for more info thank you"});
+        return res.status(500).json({ message: "something is wrong contact us for more info thank you" });
 
     }
 }
 
 export const Get2FACode = async (req, res) => {
+
     const my2fa =generateRandomNumberString(4);
     const mfaobject = await Mfa.create({
         code : my2fa
     });
     const user = await User.findOne({_id : req.params.id})
+
+    
     const replacements = {
         name: user.username,
         code: mfaobject.code
     };
     await send2faCode(user.email, 'your 2fa code is here !', replacements)
+
     return res.status(200).json({MFACode : mfaobject._id, userMail : user.email});
 }
 
@@ -198,20 +204,23 @@ export const forgotPassWord = async (req, res) =>{
                 await PassToken.findByIdAndDelete(isExsistingTokenForUser._id)
             }
             var token = await PassToken.create({
-                userId : user._id
+                userId: user._id
             })
             const replacements = {
                 name: user.username,
                 link: `http://localhost:4200/#/auth/newpassword/${token.token}`
             };
-            await sendPasswordModificationMail(user.email,'forgot you password ? no worries :D',replacements)
+            await sendPasswordModificationMail(user.email, 'forgot you password ? no worries :D', replacements)
             return res.status(200).json("mail sent");
         }
 
+
         res.status(404).json({message : 'invalid user name please check again'})
+
     }
-    catch(err){
+    catch (err) {
         console.error(err);
+
         res.status(500).json({message : 'inetrnal server error'}  )
     }
 }
@@ -262,25 +271,58 @@ export const resetPassWord = async (req, res) =>{
         await PassToken.findByIdAndDelete(validatedToken._id);
         return res.status(201).json({message : `user ${user.username} resetPassword finished`, status : true});
 
+        return res.status(200).json({ message: `valid token`, status: true });
     }
-
-        return res.status(401).json({message : `token expired unauthorized` , status : false})
-    }
-    catch(err){
+    catch (err) {
         console.error(err);
-        res.status(500).json({message : 'inetrnal server error'})
+        res.status(500).json({ message: 'inetrnal server error' })
+    }
+}
+export const resetPassWord = async (req, res) => {
+    try {
+        var validatedToken = await PassToken.findOne({ token: req.params.token });
+        let now = new Date();
+
+        const timeZoneOffset = -60; // Tunisia is 1 hour ahead of UTC
+
+        now.setMinutes(now.getMinutes() + timeZoneOffset);
+        now.setMinutes(now.getMinutes() + 20); //add 20 mins check for token TTL
+        console.log(now);
+        if (validatedToken.validUntill > now) {
+            const user = await User.findById(validatedToken.userId);
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+            const salt = user.salt;
+            const hashPassword = hashPassWordWithSalt(req.body.password, salt);
+            await User.findByIdAndUpdate(
+                user._id,
+                { password: hashPassword },
+                { new: true }
+            );
+            await PassToken.findByIdAndDelete(validatedToken._id);
+            return res.status(201).json({ message: `user ${user.username} resetPassword finished`, status: true });
+
+        }
+
+        return res.status(401).json({ message: `token expired unauthorized`, status: false })
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'inetrnal server error' })
     }
 }
 
 export const disactivaetUser = async (req, res) => {
     try {
-        if(req.user.role != RoleEnum.ADMIN){
-            return res.status(403).json({error : 'Account type not authorized for this action'});
+        if (req.user.role != RoleEnum.ADMIN) {
+            return res.status(403).json({ error: 'Account type not authorized for this action' });
         }
         const userId = req.params.id;
-        await User.findByIdAndUpdate(userId, { isActivated : false }, { new: true });
+        await User.findByIdAndUpdate(userId, { isActivated: false }, { new: true });
 
     } catch (err) {
+
         return res.status(500).json({message : "something is wrong contact us for more info thank you"});
     }
 }
@@ -326,3 +368,4 @@ export async function updateUser(req, res) {
         return res.status(500).json(err);
     }
 }
+

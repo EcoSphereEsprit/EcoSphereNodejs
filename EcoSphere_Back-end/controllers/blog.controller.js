@@ -7,6 +7,7 @@ export const createBlog = async (req, res) => {
         const { title, description, date,user } = req.body;
         //const userID = req.user.Id; // Assuming you have user ID in req.user from authentication middleware
 
+
     const image = `${req.protocol}://${req.get('host')}/img/${req.file.filename}`;
 
         const blog = new Blog({ title, description, date, image, user/*: userID*/ });

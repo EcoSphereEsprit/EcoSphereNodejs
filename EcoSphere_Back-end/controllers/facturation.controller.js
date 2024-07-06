@@ -3,7 +3,7 @@ import Facturation from '../models/Facturation.model.js';
 import Commande from '../models/commande.model.js';
 import Stripe from 'stripe';
 
-const stripe = new Stripe('sk_test_51PMo9d02MJa5rkEb3YFBNKFcrS73Kylf2c3ZEidIO6ZPFUlMCijlEbSTmz6vO94DG1AZwj18aXwZo9b7cu1uDgBV00TCbrrLmj');
+const stripe = new Stripe('votre_cle_secrete_stripe');
 
 // Créer une nouvelle facturation et un paiement via Stripe
 
@@ -19,7 +19,9 @@ export const creerFacturation = async (req, res) => {
         }
 
 
+
         const montantFinal = (montantTotal - reductions + taxes) * 100; 
+
 
         let paymentIntent;
         if (methodePaiement === 'carte_de_crédit') {
@@ -27,8 +29,9 @@ export const creerFacturation = async (req, res) => {
                 amount: montantFinal,
                 currency: 'eur',
                 payment_method_types: ['card'],
-                payment_method: 'pm_card_visa', 
+                payment_method: 'pm_card_visa',
                 confirm: true,
+
                 return_url: 'https://localhost:4000/confirmation' 
             });
         }

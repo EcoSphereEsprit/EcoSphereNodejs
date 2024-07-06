@@ -80,6 +80,7 @@ export const sendPasswordModificationMail = async (to, subject, replacements) =>
     }
 };
 
+
 export const send2faCode = async (to, subject, replacements) => {
     try {
         const html = await readHTMLFile(path.join(templatesFolderPath, '2fa.html'));
@@ -104,7 +105,33 @@ export const send2faCode = async (to, subject, replacements) => {
     }
 };
 export const sendBackValidationTemplate = async() => {
+
     const x = await readHTMLFile(path.join(templatesFolderPath, 'validation.html'));
     return x;
 }
+
+
+
+export const sendCouponMail = async (to, subject, replacements) => {
+    try {
+        const html = await readHTMLFile(path.join(templatesFolderPath, 'coupon.html'));
+        const htmlToSend = replacePlaceholders(html, replacements);
+        const mailOptions = {
+            from: '"ecosphereSupport" <ecosphere573@gmail.com>',
+            to: to,
+            subject: subject,
+            html: htmlToSend
+        };
+
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.error('Error sending email:', error);
+            } else {
+                console.log('Email sent: ' + info.response);
+            }
+        });
+    } catch (error) {
+        console.error('Error:', error);
+    }
+};
 
