@@ -4,3 +4,4 @@ running on node v20.11.0
 please npm i then npm run dev to run as dev.
 dbconenction string should be good for every one if you get any issue please update it in app.config.json.
 best of luck
+update for jira
